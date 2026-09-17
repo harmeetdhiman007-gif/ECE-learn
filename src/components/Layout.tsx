@@ -20,31 +20,64 @@ export default function Layout() {
   const coins = useStore((s) => s.coins);
 
   useEffect(() => {
-    const pid = getActivePlayerId() ?? undefined;
-    void initSync(pid);
+    const pid = () => getActivePlayerId() ?? undefined;
+    void initSync(pid());
+    // Debounce progress writes: XP/coins change dozens of times per session.
+    // Flushing at most every 30s — and right when the tab hides or closes —
+    // lets the Neon compute stay suspended between flushes instead of waking
+    // on every single tick. Keeps the free tier free.
+    let last:
+      | { xp: number; streak: number; coins: number; lessons: number; nickname: string }
+      | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const flush = () => {
+      timer = undefined;
+      if (!last) return;
+      const s = last;
+      last = null;
+      void pushProgress(s.xp, s.streak, s.lessons, s.coins, s.nickname, pid());
+    };
+    const flushIfDirty = () => {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+        timer = undefined;
+      }
+      if (last) flush();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flushIfDirty();
+    };
+    window.addEventListener('beforeunload', flushIfDirty);
+    document.addEventListener('visibilitychange', onVisibility);
     const unsub = useStore.subscribe((state, prev) => {
-      const pid = getActivePlayerId() ?? undefined;
       if (
         state.xp !== prev.xp ||
         state.streak !== prev.streak ||
         state.coins !== prev.coins ||
         state.account.nickname !== prev.account.nickname
       ) {
-        void pushProgress(
-          state.xp,
-          state.streak,
-          state.completedLessonIds.length,
-          state.coins,
-          state.account.nickname,
-          pid,
-        );
+        last = {
+          xp: state.xp,
+          streak: state.streak,
+          coins: state.coins,
+          lessons: state.completedLessonIds.length,
+          nickname: state.account.nickname,
+        };
+        if (timer === undefined) {
+          timer = setTimeout(flush, 30_000);
+        }
       }
       const newLessons = state.completedLessonIds.filter(
         (id) => !prev.completedLessonIds.includes(id),
       );
-      for (const id of newLessons) void markLesson(id, pid);
+      for (const id of newLessons) void markLesson(id, pid());
     });
-    return unsub;
+    return () => {
+      unsub();
+      if (timer !== undefined) clearTimeout(timer);
+      window.removeEventListener('beforeunload', flushIfDirty);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, []);
 
   return (

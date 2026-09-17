@@ -10,16 +10,24 @@ function LeaderboardCard() {
 
   useEffect(() => {
     let live = true;
-    void fetchLeaderboard().then((r) => {
-      if (live) setRows(r);
-    });
-    const t = setInterval(() => {
+    const load = () => {
       void fetchLeaderboard().then((r) => {
         if (live) setRows(r);
       });
-    }, 60_000);
+    };
+    load();
+    // Refresh lazily: a 60s poll keeps the Neon compute awake around the
+    // clock. Fetch on mount, when the tab becomes visible, and 10 min apart —
+    // the compute sleeps (scale-to-zero) between polls, keeping the free tier
+    // genuinely free.
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') load();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    const t = setInterval(load, 10 * 60_000);
     return () => {
       live = false;
+      document.removeEventListener('visibilitychange', onVisibility);
       clearInterval(t);
     };
   }, []);
