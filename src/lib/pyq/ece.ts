@@ -358,6 +358,153 @@ const GENS: QuestionGen[] = [
       aiExplanation: 'di/dt = 0 at DC, so v = L·di/dt = 0: the inductor is a short. A capacitor would be the open circuit.',
     }),
   },
+{
+    subject: 'Control Systems',
+    make: ({ rng }) => {
+      const c = pick(rng, [4, 16, 36, 64]);
+      const b = pick(rng, [2, 3, 4, 6]);
+      return {
+        prompt: `A second-order system has characteristic equation s² + ${2 * b}s + ${c} = 0. Its undamped natural frequency ωn is:`,
+        ...mc(rng, String(Math.sqrt(c)), [String(b), String(c), `√${2 * b}`]),
+        aiExplanation: `For s² + 2ζωn·s + ωn², the constant term is ωn² = ${c}, so ωn = √${c} = ${Math.sqrt(c)}.`,
+      };
+    },
+  },
+  {
+    subject: 'Control Systems',
+    make: ({ rng }) => {
+      const Kp = pick(rng, [4, 9, 19, 49]);
+      const ess = 1 / (1 + Kp);
+      return {
+        prompt: `A unity-feedback type-0 loop has position error constant Kp = ${Kp}. The steady-state error for a unit step input is:`,
+        ...mc(rng, fmt(ess, 2), [fmt(1 / Kp, 2), fmt(1 - ess, 2), fmt(Kp, 0)]),
+        aiExplanation: `For a type-0 system ess = 1/(1 + Kp) = 1/(1 + ${Kp}) ≈ ${fmt(ess, 2)}. Only type ≥ 1 under the step gives zero error.`,
+      };
+    },
+  },
+  {
+    subject: 'Control Systems',
+    make: ({ rng }) => ({
+      prompt: 'Negative feedback in a control loop primarily:',
+      ...mc(rng, 'Reduces sensitivity to component/parameter variations', [
+        'Always increases the open-loop gain',
+        'Destroys stability by default',
+        'Converts current to voltage',
+      ]),
+      aiExplanation:
+        'Feedback trades a little gain for big improvements in accuracy, linearity, and bandwidth — and it desensitizes the loop to component drift.',
+    }),
+  },
+  {
+    subject: 'Electromagnetic Theory',
+    make: ({ rng }) => {
+      const f = pick(rng, [100, 150, 300, 600]);
+      const lam = 300 / f;
+      return {
+        prompt: `An EM wave in free space has frequency ${f} MHz (c = 3×10⁸ m/s). Its wavelength (m) is:`,
+        ...mc(rng, fmt(lam, 2), [fmt(lam * 3, 1), fmt(lam / 3, 2), fmt(f / 300, 1)]),
+        aiExplanation: `λ = c/f = (3×10⁸) / (${f}×10⁶) = ${fmt(lam, 2)} m. Higher frequency ⇒ shorter wavelength.`,
+      };
+    },
+  },
+  {
+    subject: 'Electromagnetic Theory',
+    make: ({ rng }) => ({
+      prompt: 'The intrinsic impedance of free space is approximately:',
+      ...mc(rng, '377 Ω', ['73 Ω', '50 Ω', '120π² Ω']),
+      aiExplanation:
+        'η₀ = √(μ₀/ε₀) ≈ 377 Ω, the ratio of the E to H field in a plane wave. 50/73 Ω are antenna feed impedances.',
+    }),
+  },
+  {
+    subject: 'Microprocessors & Microcontrollers',
+    make: ({ rng }) => ({
+      prompt: 'An 8051 microcontroller provides how many 8-bit I/O ports?',
+      ...mc(rng, '4', ['2', '3', '8']),
+      aiExplanation:
+        'The 8051 has Ports 0–3, four 8-bit parallel ports; P0 is open-drain and is also the low address/data bus.',
+    }),
+  },
+  {
+    subject: 'Microprocessors & Microcontrollers',
+    make: ({ rng }) => ({
+      prompt: 'Which register in the 8051 selects the active register bank?',
+      ...mc(rng, 'PSW (via RS0/RS1 bits)', ['ACC', 'DPTR', 'SP']),
+      aiExplanation:
+        'The Program Status Word, via its RS0/RS1 bits, chooses one of four register banks R0–R7 in internal RAM.',
+    }),
+  },
+  {
+    subject: 'Digital Communications',
+    make: ({ rng }) => {
+      const tb = pick(rng, [1, 2, 5]);
+      return {
+        prompt: `A digital link sends one bit every ${tb} µs. Its bit rate is:`,
+        ...mc(rng, `${fmt(1 / tb, tb === 1 ? 0 : 1)} Mbps`, [`${fmt(tb, 0)} Mbps`, `${fmt(2 / tb, tb === 1 ? 0 : 1)} Mbps`, `${fmt(1000 * tb, 0)} Mbps`]),
+        aiExplanation: `Rb = 1/Tb = 1/${tb} µs = ${fmt(1 / tb, tb === 1 ? 0 : 1)} Mbps. Shorter bit time ⇒ higher rate.`,
+      };
+    },
+  },
+  {
+    subject: 'Digital Communications',
+    make: ({ rng }) => {
+      const rs = pick(rng, [1, 2, 4]);
+      const k = pick(rng, [2, 4]);
+      return {
+        prompt: `A ${k}-ary (${k}-bit per symbol) modulator runs at ${rs} Msymbols/s. Its bit rate is:`,
+        ...mc(rng, `${k * rs} Mbps`, [`${rs} Mbps`, `${k + rs} Mbps`, `${rs / k} Mbps`]),
+        aiExplanation: `Rb = Rs × log₂(M) = ${rs} Msym/s × log₂(${k}) = ${k * rs} Mbps — more bits per symbol, higher throughput.`,
+      };
+    },
+  },
+  {
+    subject: 'Analog Circuits',
+    make: ({ rng }) => {
+      const a = pick(rng, [1, 2, 3]);
+      const b = pick(rng, [1, 2, 3]);
+      return {
+        prompt: `An inverting summing amplifier with equal input resistors has Va = ${a} V and Vb = ${b} V. Its output is:`,
+        ...mc(rng, `${-1 * (a + b)} V`, [`${a + b} V`, `${a - b} V`, `-(${a * b}) V`]),
+        aiExplanation: `Vout = −(Va/Ra + Vb/Rb)·Rf; with equal resistors Rf/R = 1, so Vout = −(${a} + ${b}) = ${-1 * (a + b)} V.`,
+      };
+    },
+  },
+  {
+    subject: 'Analog Circuits',
+    make: ({ rng }) => ({
+      prompt: 'An op-amp run with no feedback (open loop) functions as a:',
+      ...mc(rng, 'Comparator — output saturates to a rail', [
+        'Linear inverting amplifier',
+        'Voltage follower',
+        'Integrator with exact gain',
+      ]),
+      aiExplanation:
+        'Open loop the differential gain is ~10⁵–10⁶, so any tiny input difference slams the output against +V rail or −V rail.',
+    }),
+  },
+  {
+    subject: 'Electronic Devices',
+    make: ({ rng }) => {
+      const vm = pick(rng, [10, 20, 30]);
+      const avg = vm / Math.PI;
+      return {
+        prompt: `A half-wave rectifier with a ${vm} V peak sine input (ideal diode) gives an average DC of about:`,
+        ...mc(rng, `${fmt(avg, 2)} V`, [`${fmt(vm / 2, 1)} V`, `${fmt(vm, 1)} V`, `${fmt((2 * vm) / Math.PI, 2)} V`]),
+        aiExplanation: `Vdc = Vm/π = ${vm}/π ≈ ${fmt(avg, 2)} V for half-wave; full-wave doubles it to 2Vm/π.`,
+      };
+    },
+  },
+  {
+    subject: 'Network Theory',
+    make: ({ rng }) => {
+      const [r1, r2] = distinct(rng, [100, 220, 330, 470, 680, 1000]);
+      return {
+        prompt: `Resistors ${r1} Ω and ${r2} Ω are connected in series. Their equivalent resistance is:`,
+        ...mc(rng, `${r1 + r2} Ω`, [`${(r1 * r2) / (r1 + r2)} Ω`, `${r1 * r2} Ω`, `${Math.abs(r1 - r2)} Ω`]),
+        aiExplanation: `Series resistors add: ${r1} + ${r2} = ${r1 + r2} Ω. The product/sum form is the parallel equivalent.`,
+      };
+    },
+  },
 ];
 
 export const ECE_GENS = GENS;

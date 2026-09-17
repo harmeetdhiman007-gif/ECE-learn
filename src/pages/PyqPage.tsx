@@ -3,17 +3,18 @@ import { PYQ_TRACKS, countTrackQuestions } from '../lib/pyq/index.js';
 import type { PyqTrackId } from '../lib/pyq/index.js';
 
 export default function PyqPage() {
-  const tracks: PyqTrackId[] = ['ece', 'cse', 'pcb'];
+  const tracks = Object.keys(PYQ_TRACKS) as PyqTrackId[];
   return (
     <div className="page">
       <div className="page-head">
         <h1>🤖 PYQ AI Columns</h1>
         <p className="page-sub">
-          Three AI-powered practice columns — GATE ECE, GATE CSE/IT, and the
-          PCB Design Studio. Each track banks 20 papers × 65 questions (1300+)
-          spanning 2005–2024, generated from a 1000+ question bank. Every
-          answer is followed by an AI-style explainer that shows the concept
-          and why the distractors are wrong. Each correct answer banks +10 XP.
+          Four AI-powered practice columns — GATE ECE, GATE CSE/IT, the PCB
+          Design Studio, and VLSI / FPGA / Verilog. Each track banks 20 papers ×
+          65 questions (1300+) plus on-demand subject practice, generated from a
+          multi-thousand-question bank. Every question is tiered Easy / Medium /
+          Hard so you can jump straight to a harder set, and every answer is
+          followed by an AI explainer. +10 XP per correct answer.
         </p>
       </div>
 
@@ -48,6 +49,14 @@ export default function PyqPage() {
           );
         })}
       </div>
+
+      <Link to="/pyq/ece/practice" className="practice-banner">
+        <span className="practice-banner-title">⚡ Jump by difficulty</span>
+        <span className="practice-banner-sub">
+          Straight into subject practice — pick a subject, pick Easy / Medium /
+          Hard, get a fresh set now. No year-paper needed.
+        </span>
+      </Link>
 
       <Link to="/gate" className="text-link">
         ← Back to GATE ECE Prep

@@ -1104,3 +1104,31 @@ a {
 .ai-explainer { margin-top: 12px; padding: 12px; border-radius: 12px; background: linear-gradient(180deg, var(--accent-soft), var(--bg-soft)); border: 1px solid var(--accent); font-size: 13px; color: var(--text); line-height: 1.6; }
 .ai-explainer p { margin: 6px 0 10px; }
 .ai-chip { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; color: #fff; background: linear-gradient(90deg, var(--accent), #8a7bff); border-radius: 99px; padding: 3px 9px; }
+
+/* ── Difficulty tiers ───────────────────────────────────── */
+.tier-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 14px; }
+.tier-tab { padding: 7px 13px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--bg-card); color: var(--text-dim); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+.tier-tab:hover { border-color: var(--accent); color: var(--text); }
+.tier-tab.active { background: var(--accent); color: #04140c; border-color: transparent; font-weight: 800; }
+.tier-hint { font-size: 12px; color: var(--text-dim); margin: 0 0 10px; }
+.tier-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; border-radius: 99px; padding: 4px 11px; border: 1px solid var(--border-strong); background: var(--bg-card); color: var(--text); }
+.diff-chip { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 3px 10px; margin-bottom: 10px; border: 1px solid var(--border-strong); color: var(--text); }
+.diff-easy { color: #7fe0b0; border-color: rgba(127, 224, 176, 0.4); background: rgba(127, 224, 176, 0.08); }
+.diff-medium { color: var(--yellow); border-color: rgba(255, 221, 0, 0.4); background: rgba(255, 221, 0, 0.08); }
+.diff-hard { color: var(--orange); border-color: rgba(247, 129, 102, 0.4); background: rgba(247, 129, 102, 0.08); }
+.choice-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.ai-live { margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border-strong); }
+.ai-live p { margin: 6px 0 0; }
+.ai-chip-live { background: linear-gradient(90deg, #8a7bff, var(--blue)); }
+.practice-banner { display: flex; flex-direction: column; gap: 4px; background: linear-gradient(90deg, var(--accent-soft), var(--bg-soft)); border: 1px solid var(--accent); border-radius: var(--card-radius); padding: 14px 16px; margin-bottom: 14px; text-decoration: none; color: var(--text); }
+.practice-banner:hover { border-color: var(--accent-dim); }
+.practice-banner-title { font-weight: 800; font-size: 15px; }
+.practice-banner-sub { font-size: 12px; color: var(--text-dim); }
+.pyq-subject-card { display: flex; flex-direction: column; gap: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 16px; }
+.pyq-subject-card:hover { background: var(--bg-card-hover); }
+.pyq-subject-card a { text-decoration: none; }
+.pyq-subject-title { font-weight: 800; font-size: 15px; color: var(--text); }
+.pyq-subject-card:hover .pyq-subject-title { color: var(--accent); }
+.practice-tiers { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 2px; }
+.practice-tier { padding: 5px 11px; border-radius: 99px; font-size: 12px; font-weight: 700; border: 1px solid var(--border-strong); color: var(--text); text-decoration: none; }
+.practice-tier:hover { border-color: currentColor; }

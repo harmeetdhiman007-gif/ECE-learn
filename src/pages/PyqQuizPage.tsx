@@ -1,11 +1,22 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getPyqPaper, getPyqTrack, trackOf } from '../lib/pyq/index.js';
-import type { PyqPaper } from '../lib/pyq/index.js';
+import type { PyqDifficulty, PyqPaper } from '../lib/pyq/index.js';
+import { cachedLiveExplanation, fetchLiveExplanation, liveAiConfigured } from '../lib/pyq/ai.js';
 import { useStore } from '../lib/state/store.js';
 import { playFx } from '../lib/sfx.js';
 
 const PYQ_XP_PER = 10;
+const TIER_KEY = 'ohmie-pyq-tier';
+
+type Tier = 'all' | PyqDifficulty;
+
+const TIERS: Array<{ id: Tier; label: string; emoji: string }> = [
+  { id: 'all', label: 'Full paper', emoji: '🎓' },
+  { id: 'easy', label: 'Easy', emoji: '🌱' },
+  { id: 'medium', label: 'Medium', emoji: '📖' },
+  { id: 'hard', label: 'Hard', emoji: '🔥' },
+];
 
 export default function PyqQuizPage() {
   const { track, year } = useParams();
@@ -22,16 +33,23 @@ export default function PyqQuizPage() {
   return <PyqQuiz key={`${paper.exam}-${paper.year}`} paper={paper} />;
 }
 
-function PyqQuiz({ paper }: { paper: PyqPaper }) {
+export function PyqQuiz({ paper }: { paper: PyqPaper }) {
   const track = getPyqTrack(trackOf(paper));
   const addXP = useStore((s) => s.addXP);
+  const title = paper.title ?? `${paper.exam} ${paper.paperWord} ${paper.year}`;
 
+  const [tier, setTier] = useState<Tier>(() => {
+    const saved = localStorage.getItem(TIER_KEY);
+    return saved === 'easy' || saved === 'medium' || saved === 'hard' ? saved : 'all';
+  });
   const [idx, setIdx] = useState(0);
   const [choice, setChoice] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [score, setScore] = useState(0);
   const [earned, setEarned] = useState(0);
+  const [live, setLive] = useState<string | null>(null);
+  const [liveBusy, setLiveBusy] = useState(false);
 
   const restart = () => {
     setIdx(0);
@@ -40,12 +58,22 @@ function PyqQuiz({ paper }: { paper: PyqPaper }) {
     setFinished(false);
     setScore(0);
     setEarned(0);
+    setLive(null);
+    setLiveBusy(false);
   };
 
-  const q = paper.questions[idx];
+  const pickTier = (t: Tier) => {
+    if (t === tier) return;
+    setTier(t);
+    localStorage.setItem(TIER_KEY, t);
+    restart();
+  };
+
+  const qs = tier === 'all' ? paper.questions : paper.questions.filter((q) => q.difficulty === tier);
+  const q = qs[idx];
 
   const submit = () => {
-    if (choice === null || submitted) return;
+    if (choice === null || submitted || !q) return;
     setSubmitted(true);
     const correct = choice === q.answer;
     playFx(correct ? 'correct' : 'wrong');
@@ -55,10 +83,19 @@ function PyqQuiz({ paper }: { paper: PyqPaper }) {
       addXP(PYQ_XP_PER);
     }
     setChoice(correct ? q.answer : choice);
+    setLive(cachedLiveExplanation(q.id) ?? null);
+  };
+
+  const askLive = async () => {
+    if (!q || liveBusy) return;
+    setLiveBusy(true);
+    const text = await fetchLiveExplanation(q);
+    setLiveBusy(false);
+    if (text) setLive(text);
   };
 
   const next = () => {
-    if (idx + 1 >= paper.questions.length) {
+    if (idx + 1 >= qs.length) {
       setFinished(true);
       playFx('win');
       return;
@@ -66,19 +103,28 @@ function PyqQuiz({ paper }: { paper: PyqPaper }) {
     setIdx((i) => i + 1);
     setChoice(null);
     setSubmitted(false);
+    setLive(null);
+    setLiveBusy(false);
   };
 
-  if (finished) {
+  const mix = {
+    easy: paper.questions.filter((x) => x.difficulty === 'easy').length,
+    medium: paper.questions.filter((x) => x.difficulty === 'medium').length,
+    hard: paper.questions.filter((x) => x.difficulty === 'hard').length,
+  };
+
+  if (finished || !q) {
     return (
       <div className="empty-state">
-        <div className="completion-emoji">{score >= paper.questions.length - 1 ? '🏆' : '🎯'}</div>
+        <div className="completion-emoji">{score >= qs.length - 1 ? '🏆' : '🎯'}</div>
         <h1>
-          {track?.emoji} {paper.exam} {paper.paperWord} {paper.year} done!
+          {track?.emoji} {title}
+          {tier !== 'all' ? ` · ${TIERS.find((t) => t.id === tier)?.label}` : ''} done!
         </h1>
         <p>
-          You scored <strong>{score}</strong>/{paper.questions.length} marks and
-          banked <strong>+{earned} XP</strong>. In the real exam, MCQs carry 1–2
-          marks with ⅓ negative marking.
+          You scored <strong>{score}</strong>/{qs.length} marks and banked{' '}
+          <strong>+{earned} XP</strong>. In the real exam, MCQs carry 1–2 marks
+          with ⅓ negative marking.
         </p>
         <div className="completion-actions">
           <button className="btn-primary" onClick={restart}>
@@ -97,16 +143,46 @@ function PyqQuiz({ paper }: { paper: PyqPaper }) {
     <div className="page">
       <div className="page-head">
         <h1>
-          {paper.exam} {paper.paperWord} {paper.year}
+          {paper.title ?? (
+            <>
+              {paper.exam} {paper.paperWord} {paper.year}
+            </>
+          )}
         </h1>
         <p className="page-sub">
-          Question {idx + 1} of {paper.questions.length} · {q.section} · +
-          {PYQ_XP_PER} XP per correct answer
+          Question {idx + 1} of {qs.length} · {q.section} · +{PYQ_XP_PER} XP per correct
+          answer
         </p>
       </div>
 
+      {!paper.title && (
+        <div className="tier-bar" role="tablist" aria-label="Difficulty tier">
+          {TIERS.map((t) => (
+            <button
+              key={t.id}
+              className={`tier-tab${t.id === tier ? ' active' : ''}`}
+              onClick={() => pickTier(t.id)}
+            >
+              {t.emoji} {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {mix.easy > 0 && tier === 'all' && !paper.title && (
+        <p className="tier-hint">
+          🌱 Easy {mix.easy} · 📖 Medium {mix.medium} · 🔥 Hard {mix.hard}
+        </p>
+      )}
+
       <div className="step-card">
-        <span className="section-chip">{q.section}</span>
+        <div className="choice-row">
+          <span className="section-chip">{q.section}</span>
+          <span className={`diff-chip diff-${q.difficulty}`}>
+            {q.difficulty === 'easy' ? '🌱' : q.difficulty === 'medium' ? '📖' : '🔥'}{' '}
+            {TIERS.find((t) => t.id === q.difficulty)?.label}
+          </span>
+        </div>
         <h2>{q.prompt}</h2>
         <div className="choice-list">
           {q.choices.map((c, i) => {
@@ -144,8 +220,23 @@ function PyqQuiz({ paper }: { paper: PyqPaper }) {
               <strong>{choice === q.answer ? 'Correct — ' : 'Not quite. '}</strong>
               {q.aiExplanation}
             </p>
+            {live && (
+              <div className="ai-live">
+                <span className="ai-chip ai-chip-live">✨ LIVE AI</span>
+                <p>{live}</p>
+              </div>
+            )}
+            {!live && (
+              <button
+                className="btn-ghost btn-inline"
+                onClick={() => void askLive()}
+                disabled={liveBusy}
+              >
+                {liveBusy ? 'Asking the model…' : liveAiConfigured() ? '✨ Ask live AI' : '✨ Live AI (set VITE_AI_ENDPOINT)'}
+              </button>
+            )}
             <button className="btn-primary btn-inline" onClick={next}>
-              {idx + 1 >= paper.questions.length ? 'Finish paper →' : 'Next →'}
+              {idx + 1 >= qs.length ? 'Finish paper →' : 'Next →'}
             </button>
           </div>
         )}

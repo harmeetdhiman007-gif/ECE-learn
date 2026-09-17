@@ -14,6 +14,7 @@ import GateQuizPage from './pages/GateQuizPage.js';
 import PyqPage from './pages/PyqPage.js';
 import PyqTrackPage from './pages/PyqTrackPage.js';
 import PyqQuizPage from './pages/PyqQuizPage.js';
+import PyqPracticePage from './pages/PyqPracticePage.js';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="gate/:moduleId" element={<GateQuizPage />} />
           <Route path="pyq" element={<PyqPage />} />
           <Route path="pyq/:track" element={<PyqTrackPage />} />
+          <Route path="pyq/:track/practice/:subject?/:tier?" element={<PyqPracticePage />} />
           <Route path="pyq/:track/:year" element={<PyqQuizPage />} />
         </Route>
       </Routes>

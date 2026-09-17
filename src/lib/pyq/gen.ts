@@ -1,4 +1,4 @@
-import type { PyqQuestion } from './types.js';
+import type { PyqDifficulty, PyqQuestion } from './types.js';
 
 export interface GenCtx {
   rng: () => number;
@@ -48,6 +48,18 @@ export const fmt = (x: number, d = 1): string => {
   return Number.isInteger(r) ? String(r) : r.toFixed(d);
 };
 
+/** Deterministic difficulty for a generated question: recall = easy,
+ *  one/two-number computation = medium, multi-parameter analysis = hard. */
+export function difficultyOf(q: {
+  prompt: string;
+  choices: string[];
+  answer: number;
+}): PyqDifficulty {
+  const numTokens = (q.prompt.match(/\d[\d.,]*/g) ?? []).length;
+  if (!/\d/.test(q.choices[q.answer])) return 'easy';
+  return numTokens <= 2 ? 'medium' : 'hard';
+}
+
 export function mc(
   rng: () => number,
   correct: string,
@@ -77,28 +89,43 @@ export function mc(
   return { choices: all.map((o) => o.t), answer: all.findIndex((o) => o.c) };
 }
 
+export interface PaperOptions {
+  /** Restrict generated questions to one difficulty tier. */
+  tier?: PyqDifficulty;
+}
+
 export function genPaperQuestions(
   track: string,
   year: number,
   count: number,
   gens: QuestionGen[],
+  opts?: PaperOptions,
 ): PyqQuestion[] {
   const out: PyqQuestion[] = [];
   const usedPrompts = new Set<string>();
   for (let i = 0; i < count; i++) {
     let made: PyqQuestion | null = null;
     let last: PyqQuestion | null = null;
-    for (let attempt = 0; attempt < 80; attempt++) {
-      const rng = mulberry32(hashStr(`pyq:${track}:${year}:${i}:${attempt}`));
-      const gen =
-        attempt < 24 ? gens[Math.floor(rng() * gens.length)] : gens[attempt % gens.length];
-      const m = gen.make({ rng, year, idx: i });
-      const q: PyqQuestion = { id: `${track}-${year}-${i}`, section: gen.subject, ...m };
-      last = q;
-      if (!usedPrompts.has(q.prompt)) {
-        usedPrompts.add(q.prompt);
-        made = q;
-        break;
+    const passLimit = opts?.tier ? 60 : 1;
+    for (let pass = 0; pass < passLimit && !made; pass++) {
+      for (let attempt = 0; attempt < 80; attempt++) {
+        const rng = mulberry32(hashStr(`pyq:${track}:${year}:${i}:${attempt}:${pass}`));
+        const gen =
+          attempt < 24 ? gens[Math.floor(rng() * gens.length)] : gens[attempt % gens.length];
+        const m = gen.make({ rng, year, idx: i });
+        const q: PyqQuestion = {
+          id: `${track}-${year}-${i}`,
+          section: gen.subject,
+          difficulty: difficultyOf(m),
+          ...m,
+        };
+        last = q;
+        if (opts?.tier && q.difficulty !== opts.tier) continue;
+        if (!usedPrompts.has(q.prompt)) {
+          usedPrompts.add(q.prompt);
+          made = q;
+          break;
+        }
       }
     }
     usedPrompts.add(last!.prompt);
