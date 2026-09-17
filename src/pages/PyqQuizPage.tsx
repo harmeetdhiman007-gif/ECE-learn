@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getPyqPaper, getPyqTrack, trackOf } from '../lib/pyq/index.js';
+import { getPyqPaper, getPyqTrack, trackOf, basePathForTrack } from '../lib/pyq/index.js';
 import type { PyqDifficulty, PyqPaper } from '../lib/pyq/index.js';
 import { cachedLiveExplanation, fetchLiveExplanation, liveAiConfigured } from '../lib/pyq/ai.js';
 import { useStore } from '../lib/state/store.js';
@@ -24,9 +24,9 @@ export default function PyqQuizPage() {
   if (!paper) {
     return (
       <div className="empty-state">
-        <h1>🤖 Paper not found</h1>
-        <p>That year doesn’t exist in this AI column.</p>
-        <Link to="/pyq" className="btn-primary">All PYQ columns →</Link>
+        <h1>Paper not found</h1>
+        <p>That year doesn’t exist in this track.</p>
+        <Link to="/pyq" className="btn-primary">All GATE tracks →</Link>
       </div>
     );
   }
@@ -35,6 +35,7 @@ export default function PyqQuizPage() {
 
 export function PyqQuiz({ paper }: { paper: PyqPaper }) {
   const track = getPyqTrack(trackOf(paper));
+  const base = track ? basePathForTrack(track.id) : '/pyq';
   const addXP = useStore((s) => s.addXP);
   const title = paper.title ?? `${paper.exam} ${paper.paperWord} ${paper.year}`;
 
@@ -130,10 +131,12 @@ export function PyqQuiz({ paper }: { paper: PyqPaper }) {
           <button className="btn-primary" onClick={restart}>
             Retake paper →
           </button>
-          <Link to={`/pyq/${track?.id ?? ''}`} className="btn-ghost">
+          <Link to={`${base}/${track?.id ?? ''}`} className="btn-ghost">
             All years
           </Link>
-          <Link to="/pyq" className="text-link">Other AI columns</Link>
+          <Link to={base} className="text-link">
+            {track?.gate ? 'Other GATE tracks' : 'Other studios'}
+          </Link>
         </div>
       </div>
     );

@@ -9,7 +9,7 @@ const NAV = [
   { to: '/subjects', icon: '📖', label: 'Learn' },
   { to: '/practice', icon: '🔁', label: 'Practice' },
   { to: '/world', icon: '🏙️', label: 'World' },
-  { to: '/gate', icon: '🎓', label: 'GATE' },
+  { to: '/pyq', icon: '🎓', label: 'GATE' },
   { to: '/account', icon: '🙂', label: 'You' },
 ];
 

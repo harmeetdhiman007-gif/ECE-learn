@@ -73,6 +73,16 @@ const GENS: Record<PyqTrackId, QuestionGen[]> = {
   vlsi: VLSI_GENS,
 };
 
+/** GATE exam tracks — real exam papers with AI explanations. */
+export const GATE_TRACKS: PyqTrackId[] = ['ece', 'cse'];
+/** Design studios — hands-on tool/design practice, not exam papers. */
+export const STUDIO_TRACKS: PyqTrackId[] = ['pcb', 'vlsi'];
+
+/** Route prefix for a track: GATE papers live under /pyq, studios under /studio. */
+export function basePathForTrack(track: PyqTrackId): string {
+  return PYQ_TRACKS[track].gate ? '/pyq' : '/studio';
+}
+
 export function getPyqTrack(id: string | undefined): PyqTrackMeta | null {
   if (!id || !(id in PYQ_TRACKS)) return null;
   return PYQ_TRACKS[id as PyqTrackId];

@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import {
   PRACTICE_SET_SIZE,
   PYQ_TIER_LABEL,
+  basePathForTrack,
   getPyqTrack,
   makePracticePaper,
   subjectsWithTiers,
@@ -17,11 +18,13 @@ export default function PyqPracticePage() {
   if (!meta) {
     return (
       <div className="empty-state">
-        <h1>🤖 Track not found</h1>
-        <Link to="/pyq" className="btn-primary">All PYQ columns →</Link>
+        <h1>Track not found</h1>
+        <Link to="/pyq" className="btn-primary">All GATE tracks →</Link>
       </div>
     );
   }
+
+  const base = basePathForTrack(meta.id);
 
   if (subject && (tier === 'easy' || tier === 'medium' || tier === 'hard')) {
     const paper = makePracticePaper(meta.id, subject, tier);
@@ -29,7 +32,7 @@ export default function PyqPracticePage() {
       return (
         <div className="empty-state">
           <h1>⚠️ No questions found</h1>
-          <Link to={`/pyq/${meta.id}/practice`} className="btn-primary">
+          <Link to={`${base}/${meta.id}/practice`} className="btn-primary">
             Pick another subject →
           </Link>
         </div>
@@ -57,7 +60,7 @@ export default function PyqPracticePage() {
           {(row ? row.tiers : TIERS).map((t) => (
             <Link
               key={t}
-              to={`/pyq/${meta.id}/practice/${encodeURIComponent(subject)}/${t}`}
+              to={`${base}/${meta.id}/practice/${encodeURIComponent(subject)}/${t}`}
               className="pyq-year"
             >
               <span className="pyq-year-num">
@@ -73,7 +76,7 @@ export default function PyqPracticePage() {
             </Link>
           ))}
         </div>
-        <Link to={`/pyq/${meta.id}`} className="text-link">
+        <Link to={`${base}/${meta.id}`} className="text-link">
           ← Back to {meta.exam} {meta.paperWord.toLowerCase()}s
         </Link>
       </div>
@@ -96,14 +99,14 @@ export default function PyqPracticePage() {
       <div className="pyq-columns">
         {rows.map((row) => (
           <div key={row.subject} className="pyq-subject-card">
-            <Link to={`/pyq/${meta.id}/practice/${encodeURIComponent(row.subject)}`}>
+            <Link to={`${base}/${meta.id}/practice/${encodeURIComponent(row.subject)}`}>
               <span className="pyq-subject-title">{row.subject}</span>
             </Link>
             <div className="practice-tiers">
               {row.tiers.map((t) => (
                 <Link
                   key={t}
-                  to={`/pyq/${meta.id}/practice/${encodeURIComponent(row.subject)}/${t}`}
+                  to={`${base}/${meta.id}/practice/${encodeURIComponent(row.subject)}/${t}`}
                   className={`practice-tier diff-${t}`}
                 >
                   {PYQ_TIER_LABEL[t]}
@@ -114,7 +117,7 @@ export default function PyqPracticePage() {
         ))}
       </div>
 
-      <Link to={`/pyq/${meta.id}`} className="text-link">
+      <Link to={`${base}/${meta.id}`} className="text-link">
         ← Back to {meta.exam} {meta.paperWord.toLowerCase()}s
       </Link>
     </div>

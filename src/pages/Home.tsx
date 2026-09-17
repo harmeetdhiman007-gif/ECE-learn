@@ -96,15 +96,20 @@ export default function Home() {
           <span className="today-title">Copper Town</span>
           <span className="today-sub">Duel a trainer in SiLo World</span>
         </Link>
-        <Link to="/gate" className="today-card">
-          <span className="today-emoji">🎓</span>
-          <span className="today-title">GATE ECE Prep</span>
-          <span className="today-sub">Syllabus + practice · +10 XP each</span>
-        </Link>
         <Link to="/pyq" className="today-card">
-          <span className="today-emoji">🤖</span>
-          <span className="today-title">PYQ AI Columns</span>
-          <span className="today-sub">GATE ECE + CSE + PCB · 2005–2024 · AI explained</span>
+          <span className="today-emoji">🎓</span>
+          <span className="today-title">GATE PYQs</span>
+          <span className="today-sub">ECE + CSE/IT · 2005–2024 · AI explained</span>
+        </Link>
+        <Link to="/studio/pcb" className="today-card">
+          <span className="today-emoji">📐</span>
+          <span className="today-title">PCB Design Studio</span>
+          <span className="today-sub">Layout, routing & DRC practice</span>
+        </Link>
+        <Link to="/studio/vlsi" className="today-card">
+          <span className="today-emoji">⚙️</span>
+          <span className="today-title">VLSI &amp; Verilog Studio</span>
+          <span className="today-sub">RTL, timing & ASIC-flow practice</span>
         </Link>
       </section>
 

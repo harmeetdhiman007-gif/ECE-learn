@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import {
   QUESTIONS_PER_PAPER,
+  basePathForTrack,
   getPyqSubjects,
   getPyqTrack,
   pyqDifficultyMix,
@@ -12,16 +13,16 @@ export default function PyqTrackPage() {
   if (!meta) {
     return (
       <div className="empty-state">
-        <h1>🤖 Track not found</h1>
+        <h1>Track not found</h1>
         <p>
-          That AI column doesn’t exist — pick ECE, CSE/IT, PCB Design or VLSI/
-          FPGA.
+          That track doesn’t exist — pick GATE ECE or CSE/IT.
         </p>
-        <Link to="/pyq" className="btn-primary">All PYQ columns →</Link>
+        <Link to="/pyq" className="btn-primary">All GATE tracks →</Link>
       </div>
     );
   }
 
+  const base = basePathForTrack(meta.id);
   const unit = meta.paperWord.toLowerCase();
   const mix = pyqDifficultyMix(meta.id);
   const subjects = getPyqSubjects(meta.id);
@@ -30,7 +31,8 @@ export default function PyqTrackPage() {
     <div className="page">
       <div className="page-head">
         <h1>
-          {meta.emoji} {meta.gate ? `GATE ${meta.exam}` : meta.title} — PYQ AI
+          {meta.emoji} {meta.gate ? `GATE ${meta.exam}` : meta.title}
+          {meta.gate ? ' — PYQ AI' : ' — Studio'}
         </h1>
         <p className="page-sub">
           {meta.years.length} {unit}s · {QUESTIONS_PER_PAPER} questions each.
@@ -44,7 +46,7 @@ export default function PyqTrackPage() {
         </div>
       </div>
 
-      <Link to={`/pyq/${meta.id}/practice`} className="practice-banner">
+      <Link to={`${base}/${meta.id}/practice`} className="practice-banner">
         <span className="practice-banner-title">⚡ Subject practice</span>
         <span className="practice-banner-sub">
           {subjects.length} subjects · Easy / Medium / Hard sets, freshly
@@ -54,7 +56,7 @@ export default function PyqTrackPage() {
 
       <div className="pyq-grid">
         {meta.years.map((y) => (
-          <Link key={y} to={`/pyq/${meta.id}/${y}`} className="pyq-year">
+          <Link key={y} to={`${base}/${meta.id}/${y}`} className="pyq-year">
             <span className="pyq-year-num">{y}</span>
             <span className="pyq-year-meta">
               <span className="pyq-year-label">
@@ -69,8 +71,8 @@ export default function PyqTrackPage() {
         ))}
       </div>
 
-      <Link to="/pyq" className="text-link">
-        ← All PYQ columns
+      <Link to={base} className="text-link">
+        ← All {meta.gate ? 'GATE tracks' : 'studios'}
       </Link>
     </div>
   );
