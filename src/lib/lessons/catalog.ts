@@ -134,6 +134,19 @@ export const SUBJECTS: Subject[] = [
       { id: 'u-actuators', title: 'Making Things Move', lessonIds: ['l-motor', 'l-servo'] },
     ],
   },
+  {
+    id: 'vlsi',
+    title: 'VLSI & FPGA',
+    description: 'Verilog HDL from the ground up — wires to state machines.',
+    color: '#8a7bff',
+    icon: '⚙️',
+    lessonIds: ['lv1', 'lv2', 'lv3', 'lv4', 'lv5', 'lv6', 'lv7', 'lv8'],
+    units: [
+      { id: 'u-vlsi-basics', title: 'Verilog Basics', lessonIds: ['lv1', 'lv2', 'lv3'] },
+      { id: 'u-vlsi-seq', title: 'Sequential Logic', lessonIds: ['lv4', 'lv5', 'lv6'] },
+      { id: 'u-vlsi-fpga', title: 'FPGA & Synthesis', lessonIds: ['lv7', 'lv8'] },
+    ],
+  },
 ];
 
 // ── Lessons ──────────────────────────────────────────────────────────
@@ -1829,6 +1842,549 @@ instruction:
         correctIndex: 0,
         explanation:
           'Servos use power, ground, and a signal wire that carries the position pulses.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV1: What is an HDL? ──────────────────────────────────────────
+  {
+    id: 'lv1',
+    title: 'Verilog: Description, not Instructions',
+    subtitle: 'You write code, but you are really drawing a circuit.',
+    subjectId: 'vlsi',
+    order: 1,
+    xpReward: 30,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv1-s1',
+        title: 'Software vs hardware',
+        body:
+          "Software runs one instruction at a time on a CPU. A Hardware Description Language like Verilog is different: you describe wires, logic gates, and registers, and every part is active at the same time. When you write a line of Verilog, you are really drawing a circuit.",
+      },
+      {
+        type: 'info',
+        id: 'lv1-s2',
+        title: 'Two worlds: simulation and synthesis',
+        body:
+          "Simulation runs your design on a PC to check whether the behaviour is right. Synthesis compiles the same code into real hardware: flip-flops and LUTs on an FPGA, or standard cells on a chip. A race condition can pass simulation yet make the real chip behave randomly.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv1-q1',
+        prompt: 'An HDL like Verilog is used to:',
+        choices: [
+          'Describe hardware circuits, like a schematic you can simulate and synthesize',
+          'Run apps on your phone',
+          'Format hard drives',
+          'Type documents',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Verilog describes digital hardware. The same description is simulated to check behaviour, then synthesized into gates.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv1-q2',
+        prompt: 'Circuits described in Verilog execute:',
+        choices: [
+          'One statement at a time, like software',
+          'All at once, in parallel, driven by the clock',
+          'Only after you press a button',
+          'Once, then stop forever',
+        ],
+        correctIndex: 1,
+        explanation:
+          'Hardware is inherently parallel: every gate and register is active simultaneously, synchronised by the clock.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv1-q3',
+        prompt: 'Synthesis is the step that:',
+        choices: [
+          'Checks your spelling',
+          'Download the design to a printer',
+          'Maps the Verilog onto real gates or LUTs',
+          'Deletes unused files',
+        ],
+        correctIndex: 2,
+        explanation:
+          'Synthesis turns RTL into a real gate/LUT netlist; place-and-route then places it onto the FPGA or chip.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV2: Modules, wires & regs ────────────────────────────────────
+  {
+    id: 'lv2',
+    title: 'Modules, Wires and Registers',
+    subtitle: 'The three things every design is built from.',
+    subjectId: 'vlsi',
+    order: 2,
+    xpReward: 30,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv2-s1',
+        title: 'A module is a chip',
+        body:
+          "module half_adder(input a, input b, output sum, output carry); ... endmodule. A module is a self-contained block with named ports. You instantiate modules inside other modules, exactly like placing chips on a board.",
+      },
+      {
+        type: 'info',
+        id: 'lv2-s2',
+        title: 'wire vs reg',
+        body:
+          "A wire is driven continuously — by assign or by another port — like a physical connection. A reg is a variable assigned inside an always block; it can hold its value and is what becomes a flip-flop.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv2-q1',
+        prompt: 'Which keyword names a re-usable hardware block with ports?',
+        choices: ['module', 'function', 'class', 'library'],
+        correctIndex: 0,
+        explanation:
+          'module ... endmodule wraps a design, complete with input/output ports.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv2-q2',
+        prompt: 'A signal driven with a continuous assign is usually declared as a:',
+        choices: ['reg', 'wire', 'int', 'parameter'],
+        correctIndex: 1,
+        explanation:
+          'assign drives a wire with a permanent logic equation — continuous assignment, like a soldered connection.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv2-q3',
+        prompt: 'The port directions a module can declare are:',
+        choices: [
+          'push, pull and float',
+          'high, low and zero',
+          'input, output and inout',
+          'read, write and erase',
+        ],
+        correctIndex: 2,
+        explanation:
+          'Ports carry signal direction: input, output, or bidirectional inout.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV3: Combinational logic ──────────────────────────────────────
+  {
+    id: 'lv3',
+    title: 'Combinational Logic: assign & always_comb',
+    subtitle: 'Build logic gates with code instead of schematics.',
+    subjectId: 'vlsi',
+    order: 3,
+    xpReward: 30,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv3-s1',
+        title: 'Continuous assignment',
+        body:
+          "assign y = a & b; means y is permanently the AND of a and b — a real 2-input gate. assign is the fastest way to express boolean equations in Verilog.",
+      },
+      {
+        type: 'info',
+        id: 'lv3-s2',
+        title: 'always_comb and latches',
+        body:
+          "always_comb builds combinational logic out of if/else and case statements. Old Verilog used always @(*). The golden rule: every signal must be assigned in every path, or the tool infers a latch you never asked for.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv3-q1',
+        prompt: 'The statement assign y = a & b; describes:',
+        choices: [
+          'A 2-input AND gate',
+          'A flip-flop',
+          'An infinite loop',
+          'A memory array',
+        ],
+        correctIndex: 0,
+        explanation:
+          'assign is continuous: y follows (a & b) forever — that is exactly a 2-input AND gate.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv3-q2',
+        prompt: 'In an always_comb block with an if with no else, what gets inferred?',
+        choices: [
+          'Nothing — it is fine',
+          'A latch',
+          'A clock divider',
+          'A testbench',
+        ],
+        correctIndex: 1,
+        explanation:
+          'A missing else leaves the signal holding its previous value when the condition is false — a latch. Give every branch a value.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv3-q3',
+        prompt: 'The operator that means bitwise AND in Verilog is:',
+        choices: ['&&', '&', '@', '§'],
+        correctIndex: 1,
+        explanation:
+          '& is bitwise AND; && is logical AND for conditions. For a = 4, b = 3: a & b = 0 (no shared bits), but a && b = 1 (both truthy).',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV4: Clocks & flip-flops ──────────────────────────────────────
+  {
+    id: 'lv4',
+    title: 'Clocks & Flip-Flops: always_ff',
+    subtitle: 'Edge-triggered logic is the heart of every chip.',
+    subjectId: 'vlsi',
+    order: 4,
+    xpReward: 30,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv4-s1',
+        title: 'The D flip-flop',
+        body:
+          "A D flip-flop stores one bit and updates it only on the clock edge. In SystemVerilog: always_ff @(posedge clk) q <= d;. Between edges, the stored value is stable — that is what makes hardware predictable.",
+      },
+      {
+        type: 'info',
+        id: 'lv4-s2',
+        title: 'Blocking vs non-blocking',
+        body:
+          "Non-blocking assignments q <= d; are for sequential (clocked) logic — they mean every flip-flop takes its snapshot at the same edge. Blocking assignments = are for combinational logic inside always_comb. Mixing them up is the most common Verilog bug.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv4-q1',
+        prompt: 'How often does a D flip-flop update its stored value?',
+        choices: [
+          'Whenever the input changes',
+          'Only on the active clock edge',
+          'Once per second',
+          'Never',
+        ],
+        correctIndex: 1,
+        explanation:
+          'Everything updates on the clock edge — usually the rising edge — so all flip-flops change together.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv4-q2',
+        prompt: 'Non-blocking assignment (<=) should be used inside:',
+        choices: [
+          'always_comb blocks',
+          'assigned wires',
+          'clocked always_ff blocks',
+          'initial blocks only',
+        ],
+        correctIndex: 2,
+        explanation:
+          'Non-blocking assignment models flip-flops: reads use old values, writes schedule new ones — no races across the edge.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv4-q3',
+        prompt: 'The phrase @(posedge clk) in a sensitivity list means the block runs:',
+        choices: [
+          'When clk is high continuously',
+          'Once, at start-up',
+          'Only at the rising edge of clk',
+          'When clk is low',
+        ],
+        correctIndex: 2,
+        explanation:
+          'posedge clk triggers the block only on the 0→1 transition. That edge is the flip-flop heartbeat.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV5: Counters & dividers ──────────────────────────────────────
+  {
+    id: 'lv5',
+    title: 'Counters & Clock Dividers',
+    subtitle: 'The register + arithmetic pattern behind everything timed.',
+    subjectId: 'vlsi',
+    order: 5,
+    xpReward: 30,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv5-s1',
+        title: 'A counter is a register plus an increment',
+        body:
+          "always_ff @(posedge clk) count <= count + 1; — on every rising edge the register advances. A mod-N counter counts 0, 1, ... N-1 then wraps to 0. When it wraps it has divided the clock frequency by N.",
+      },
+      {
+        type: 'info',
+        id: 'lv5-s2',
+        title: 'Dividing by two with one flop',
+        body:
+          "A single flip-flop wired as toggle (d <= ~d) flips its output each edge — a perfect ÷2 divider. Chain them and a 50 MHz clock becomes 25 MHz, 12.5 MHz, ... which is how an FPGA makes a slow 1 Hz blink from a fast crystal.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv5-q1',
+        prompt: 'A mod-N counter reaches 0 again after:',
+        choices: ['1 count', 'N counts', 'N² counts', 'Never'],
+        correctIndex: 1,
+        explanation:
+          'Counting 0..N-1 takes N edges, then it wraps — dividing the input frequency by N.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv5-q2',
+        prompt: 'The line count <= count + 1; inside always_ff @(posedge clk) will:',
+        choices: [
+          'Increment count on every rising edge',
+          'Increment once in simulation',
+          'Compile as a latch',
+          'Reset the clock',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Each posedge triggers the assignment, so the register advances by one every clock cycle.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv5-q3',
+        prompt: 'To turn a 50 MHz input into a 25 MHz output you need:',
+        choices: [
+          'A counter to 25',
+          'A single toggle flip-flop (÷2)',
+          'A 50-bit reg',
+          'At least two clocks',
+        ],
+        correctIndex: 1,
+        explanation:
+          'One toggle flop divides by two: 50 MHz ÷ 2 = 25 MHz. Toggle chains divide by powers of two.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV6: State machines ───────────────────────────────────────────
+  {
+    id: 'lv6',
+    title: 'State Machines (FSM)',
+    subtitle: 'Give hardware a memory of where it is.',
+    subjectId: 'vlsi',
+    order: 6,
+    xpReward: 40,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv6-s1',
+        title: 'Anatomy of an FSM',
+        body:
+          "A finite state machine has a state register (which state we are in), next-state logic (how we move), and output logic. A Moore machine drives outputs only from the current state; a Mealy machine also reacts to inputs immediately.",
+      },
+      {
+        type: 'info',
+        id: 'lv6-s2',
+        title: 'The written-out style',
+        body:
+          "Typical style: a state enum with typedef, an always_ff for the state register, and an always_comb big case (state) for next state and outputs. Give the case a default — never leave a state undefined.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv6-q1',
+        prompt: 'In a Moore machine, outputs depend on:',
+        choices: [
+          'The current state only',
+          'The current inputs only',
+          'Both inputs and state',
+          'The clock frequency',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Moore outputs are a pure function of the state — glitch-free but one cycle slower to react.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv6-q2',
+        prompt: 'In a Mealy machine, outputs can change:',
+        choices: [
+          'Only at reset',
+          'Immediately when an input changes',
+          'Never, once synthesised',
+          'Only in the testbench',
+        ],
+        correctIndex: 1,
+        explanation:
+          'Mealy outputs also depend on inputs, so they respond without waiting for the next clock edge.',
+        xp: 10,
+      },
+      {
+        type: 'order',
+        id: 'lv6-o1',
+        prompt: 'Build an FSM the right way:',
+        instruction: 'Put the design flow in the correct order.',
+        items: [
+          'Draw a state diagram',
+          'Identify the states',
+          'Declare the state register',
+          'Write next-state combinational logic',
+          'Write the outputs',
+          'Simulate to verify',
+        ],
+        correctOrder: [
+          'Identify the states',
+          'Draw a state diagram',
+          'Declare the state register',
+          'Write next-state combinational logic',
+          'Write the outputs',
+          'Simulate to verify',
+        ],
+        explanation:
+          'Understand the behaviour first, sketch it, then encode: register → next-state → outputs → verify.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV7: First synthesizable design ───────────────────────────────
+  {
+    id: 'lv7',
+    title: 'Your First FPGA Design: Blinky',
+    subtitle: 'A counter, a comparator, and one LED.',
+    subjectId: 'vlsi',
+    order: 7,
+    xpReward: 40,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv7-s1',
+        title: 'The plan',
+        body:
+          "Blinky is the hardware hello world. A 50 MHz crystal drives a counter. When it reaches 25,000,000 (0.5 s of edges), you toggle the LED with led <= ~led; and reset the counter. Run it in simulation first, then synthesise.",
+      },
+      {
+        type: 'info',
+        id: 'lv7-s2',
+        title: 'Simulation before synthesis',
+        body:
+          "Write a testbench module that generates clk and an initial reset, then watch the LED waveform. If it toggles every 0.5 s in simulation, synthesis on real hardware will behave the same way — same RTL, same timing intent.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv7-q1',
+        prompt: 'A 50 MHz clock has a period of:',
+        choices: ['5 ns', '20 ns', '50 ns', '500 ns'],
+        correctIndex: 1,
+        explanation:
+          'Period = 1 / frequency = 1 / 50,000,000 s = 20 ns.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv7-q2',
+        prompt: 'To toggle an LED once per second with a 50 MHz clock, the counter should count to about:',
+        choices: ['25', '2,500', '25,000,000', '50,000,000'],
+        correctIndex: 2,
+        explanation:
+          '25,000,000 edges = 0.5 s; toggle there and the LED changes every second (0.5 s on, 0.5 s off).',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv7-q3',
+        prompt: 'A testbench is:',
+        choices: [
+          'The design that goes on the FPGA',
+          'Verilog that feeds stimulus to the design and checks the response',
+          'A hardware tester bench',
+          'A reserved keyword',
+        ],
+        correctIndex: 1,
+        explanation:
+          'A testbench drives clocks and inputs into your design and lets you verify behaviour in simulation.',
+        xp: 10,
+      },
+    ],
+  },
+
+  // ─── LV8: FPGA fabric & timing ─────────────────────────────────────
+  {
+    id: 'lv8',
+    title: 'FPGA Fabric & Timing Reality',
+    subtitle: 'How LUTs, setup and hold shape real performance.',
+    subjectId: 'vlsi',
+    order: 8,
+    xpReward: 40,
+    steps: [
+      {
+        type: 'info',
+        id: 'lv8-s1',
+        title: 'LUT + FF fabric',
+        body:
+          "An FPGA is a sea of configurable logic blocks. Each block has a small lookup table (LUT) that can compute any tiny boolean function, followed by a flip-flop. Your Verilog is decomposed into thousands of LUT+FF pairs, wired by configurable routing.",
+      },
+      {
+        type: 'info',
+        id: 'lv8-s2',
+        title: 'Setup, hold & the critical path',
+        body:
+          "A flip-flop needs its input stable for a setup time before the edge and a hold time after. The longest combinational path between two flops sets the maximum clock speed: f_max = 1 / (path delay + setup). Cross-clock inputs need a two-flop synchroniser to avoid metastability.",
+      },
+      {
+        type: 'quiz',
+        id: 'lv8-q1',
+        prompt: 'The longest combinational path between flip-flops determines:',
+        choices: [
+          'The LED colour',
+          'The maximum usable clock frequency',
+          'The number of pins',
+          'The size of the bitstream',
+        ],
+        correctIndex: 1,
+        explanation:
+          'You cannot clock faster than the slowest path allows, or the slave flop misses setup time.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv8-q2',
+        prompt: 'The time a flop needs its input stable before the clock edge is called:',
+        choices: ['Hold time', 'Setback time', 'Setup time', 'Rise time'],
+        correctIndex: 2,
+        explanation:
+          'Setup is the window before the edge; hold is the window after it. Both must be honoured for reliable capture.',
+        xp: 10,
+      },
+      {
+        type: 'quiz',
+        id: 'lv8-q3',
+        prompt: 'To safely bring an external async signal into a clock domain you should:',
+        choices: [
+          'Use a two-flop synchroniser',
+          'Wire it directly to the counter',
+          'Add a capacitor',
+          'Ignore it',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Two (or three) flops in a row let a metastable signal settle before it reaches your logic.',
         xp: 10,
       },
     ],
