@@ -5,8 +5,9 @@
   --bg-card-hover: #1a2330;
   --border: #1f2b3a;
   --border-strong: #2a3a4d;
-  --accent: #00ff88;
+--accent: #00ff88;
   --accent-dim: #00cc6a;
+  --accent-soft: rgba(0, 255, 136, 0.1);
   --blue: #58a6ff;
   --orange: #f78166;
   --red: #ff4444;
@@ -1062,3 +1063,44 @@ a {
 .syllabus-weight { font-size: 12px; color: var(--text-dim); font-weight: 400; }
 .syllabus-item ul { margin: 8px 0 0; padding-left: 18px; }
 .syllabus-item li { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+/* ── auth ─────────────────────────────────────────────── */
+.auth-panel { margin-bottom: 18px; }
+.auth-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.auth-tab { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-soft); color: var(--text-dim); font-weight: 700; cursor: pointer; }
+.auth-tab.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.auth-form { display: flex; flex-direction: column; gap: 10px; }
+.auth-input { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-soft); color: var(--text); font-size: 15px; }
+.auth-input:focus { outline: none; border-color: var(--accent); }
+.auth-error { font-size: 13px; color: var(--red); }
+.auth-id { flex: 1; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.auth-email { font-size: 13px; color: var(--text-dim); }
+.auth-note { font-size: 12px; color: var(--text-dim); text-align: left; margin-top: 4px; }
+
+/* ── 10-year PYQ AI ─────────────────────────────────── */
+.pyq-note { background: var(--bg-soft); border: 1px dashed var(--border-strong); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
+.pyq-columns { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
+@media (min-width: 560px) { .pyq-columns { grid-template-columns: 1fr 1fr; } }
+.pyq-columns-sm { grid-template-columns: 1fr; }
+.pyq-column { display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 16px; text-decoration: none; color: var(--text); position: relative; overflow: hidden; }
+.pyq-column::before { content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--accent), #8a7bff); }
+.pyq-column:hover { background: var(--bg-card-hover); }
+.pyq-col-emoji { font-size: 26px; }
+.pyq-col-head { display: flex; flex-direction: column; gap: 2px; }
+.pyq-col-title { font-weight: 800; font-size: 17px; }
+.pyq-col-sub { font-size: 12px; color: var(--accent); font-weight: 600; }
+.pyq-col-blurb { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+.pyq-col-foot { margin-top: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-dim); }
+.pyq-col-cta { color: var(--accent); font-weight: 700; }
+.pyq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.pyq-year { display: flex; flex-direction: column; gap: 6px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 14px; text-decoration: none; color: var(--text); }
+.pyq-year:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+.pyq-year-num { font-size: 28px; font-weight: 800; color: var(--accent); }
+.pyq-year-meta { display: flex; flex-direction: column; gap: 2px; }
+.pyq-year-label { font-weight: 700; font-size: 13px; }
+.pyq-year-sub { font-size: 11px; color: var(--text-dim); }
+.pyq-year-arrow { margin-top: auto; color: var(--accent); font-weight: 700; text-align: right; }
+.section-chip { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 99px; padding: 3px 9px; margin-bottom: 10px; }
+.ai-explainer { margin-top: 12px; padding: 12px; border-radius: 12px; background: linear-gradient(180deg, var(--accent-soft), var(--bg-soft)); border: 1px solid var(--accent); font-size: 13px; color: var(--text); line-height: 1.6; }
+.ai-explainer p { margin: 6px 0 10px; }
+.ai-chip { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; color: #fff; background: linear-gradient(90deg, var(--accent), #8a7bff); border-radius: 99px; padding: 3px 9px; }

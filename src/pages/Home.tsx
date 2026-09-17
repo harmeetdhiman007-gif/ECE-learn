@@ -39,13 +39,13 @@ export default function Home() {
                 <line x1="98" y1="34" x2="110" y2="24" />
               </g>
               <rect x="42" y="94" width="36" height="20" rx="6" fill="#141d2a" stroke="#00ff88" strokeWidth="2" />
-              <text x="60" y="109" fontSize="13" textAnchor="middle" fill="#00ff88" fontWeight="700">Ω</text>
+              <text x="60" y="109" fontSize="13" textAnchor="middle" fill="#00ff88" fontWeight="700">Si</text>
               <line x1="60" y1="114" x2="60" y2="126" stroke="#00ff88" strokeWidth="3" />
               <line x1="42" y1="130" x2="78" y2="130" stroke="#00ff88" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
           <div className="bubble">
-            Hey! I'm <strong>Ohmie</strong>. Ready to spark some knowledge? ⚡
+            Hey! I'm <strong>SiLo</strong>. Ready to spark some knowledge? ⚡
           </div>
         </div>
       </section>
@@ -94,12 +94,17 @@ export default function Home() {
         <Link to="/world" className="today-card">
           <span className="today-emoji">🏙️</span>
           <span className="today-title">Copper Town</span>
-          <span className="today-sub">Duel a trainer in Ohmie World</span>
+          <span className="today-sub">Duel a trainer in SiLo World</span>
         </Link>
         <Link to="/gate" className="today-card">
           <span className="today-emoji">🎓</span>
           <span className="today-title">GATE ECE Prep</span>
           <span className="today-sub">Syllabus + practice · +10 XP each</span>
+        </Link>
+        <Link to="/pyq" className="today-card">
+          <span className="today-emoji">🤖</span>
+          <span className="today-title">PYQ AI Columns</span>
+          <span className="today-sub">GATE ECE + CSE + PCB · 2005–2024 · AI explained</span>
         </Link>
       </section>
 

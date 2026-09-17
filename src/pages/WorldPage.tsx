@@ -36,7 +36,7 @@ export default function World() {
       <div className="page-head">
         <h1>🏙️ Copper Town</h1>
         <p className="page-sub">
-          Ohmie World — duel trainers with real questions and climb the town
+          SiLo World — duel trainers with real questions and climb the town
           leaderboard.
         </p>
       </div>

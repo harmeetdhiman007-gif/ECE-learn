@@ -1,4 +1,4 @@
-package io.ohmie.app;
+package io.silo.app;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useStore, useCurrentHearts } from '../lib/state/store.js';
 import { getLevel } from '../lib/state/levels.js';
 import { getAchievements } from '../lib/state/achievements.js';
+import { getSession, signUp, logIn, logOut } from '../lib/auth.js';
+import type { Session } from '../lib/auth.js';
 
 export default function AccountPage() {
   const xp = useStore((s) => s.xp);
@@ -21,6 +23,7 @@ export default function AccountPage() {
 
   const [editNick, setEditNick] = useState(false);
   const [draft, setDraft] = useState(nickname);
+  const [session, setSession] = useState<Session | null>(() => getSession());
 
   const info = getLevel(xp);
   const pct = Math.min(
@@ -72,6 +75,18 @@ export default function AccountPage() {
           <div className="progress-fill" style={{ width: `${pct}%` }} />
         </div>
       </div>
+
+      <AuthPanel
+        session={session}
+        onSession={(s) => {
+          setSession(s);
+          setNickname(s.nickname);
+        }}
+        onLogout={() => {
+          logOut();
+          setSession(null);
+        }}
+      />
 
       <section className="stat-row">
         <div className="stat-card">
@@ -141,5 +156,123 @@ export default function AccountPage() {
         Total coins: {coins}. Hearts also refill for free, one every 30 minutes.
       </p>
     </div>
+  );
+}
+
+function AuthPanel({
+  session,
+  onSession,
+  onLogout,
+}: {
+  session: Session | null;
+  onSession: (s: Session) => void;
+  onLogout: () => void;
+}) {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signup');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickname, setNicknameDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const submit = async () => {
+    setBusy(true);
+    setError('');
+    const res =
+      mode === 'signup'
+        ? await signUp(email, password, nickname)
+        : await logIn(email, password);
+    setBusy(false);
+    if (!res.ok || !res.session) {
+      setError(res.error ?? 'Something went wrong.');
+      return;
+    }
+    onSession(res.session);
+  };
+
+  if (session) {
+    return (
+      <section className="auth-panel">
+        <div className="profile-card">
+          <div className="profile-avatar">👤</div>
+          <div className="auth-id">
+            <span className="profile-title">{session.nickname}</span>
+            <span className="auth-email">{session.email}</span>
+            <span className="auth-note">
+              Signed in — progress syncs to your account. Use the name above to
+              edit your leaderboard nickname.
+            </span>
+          </div>
+        </div>
+        <button className="btn-ghost btn-inline" onClick={onLogout}>
+          Log out
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section className="auth-panel">
+      <div className="page-head">
+        <h2>🔐 {mode === 'signup' ? 'Create account' : 'Welcome back'}</h2>
+        <p className="page-sub">
+          Save your identity and leaderboard nickname online. Works offline
+          first — sync happens when the network is there.
+        </p>
+      </div>
+      <div className="auth-tabs">
+        <button
+          className={`auth-tab ${mode === 'signup' ? 'active' : ''}`}
+          onClick={() => {
+            setMode('signup');
+            setError('');
+          }}
+        >
+          Sign up
+        </button>
+        <button
+          className={`auth-tab ${mode === 'signin' ? 'active' : ''}`}
+          onClick={() => {
+            setMode('signin');
+            setError('');
+          }}
+        >
+          Log in
+        </button>
+      </div>
+      <div className="auth-form">
+        {mode === 'signup' && (
+          <input
+            className="auth-input"
+            value={nickname}
+            maxLength={24}
+            onChange={(e) => setNicknameDraft(e.target.value)}
+            placeholder="Leaderboard nickname"
+          />
+        )}
+        <input
+          className="auth-input"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+        />
+        <input
+          className="auth-input"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password (min 6 characters)"
+        />
+        {error && <div className="auth-error">{error}</div>}
+        <button
+          className="btn-primary btn-inline"
+          disabled={busy || !email || password.length < 6}
+          onClick={() => void submit()}
+        >
+          {busy ? 'Working…' : mode === 'signup' ? 'Create account' : 'Log in'}
+        </button>
+      </div>
+    </section>
   );
 }

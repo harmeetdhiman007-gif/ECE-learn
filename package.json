@@ -1,5 +1,5 @@
 {
-  "name": "ohmie",
+  "name": "silo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,7 +9,9 @@
     "lint": "oxlint",
     "test": "tsx --test test/engine.test.ts",
     "preview": "vite preview",
-    "assets": "node scripts/gen-assets.mjs"
+    "assets": "node scripts/gen-assets.mjs",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
     "@capacitor/cli": "^8.5.2",

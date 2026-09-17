@@ -19,6 +19,47 @@ export default function GatePage() {
         a reproduction of past papers.
       </div>
 
+      <section className="section-title">
+        <h2>🤖 PYQ AI Columns</h2>
+      </section>
+      <div className="pyq-columns pyq-columns-sm">
+        <Link to="/pyq/ece" className="pyq-column">
+          <span className="pyq-col-emoji">🔌</span>
+          <span className="pyq-col-head">
+            <span className="pyq-col-title">GATE ECE</span>
+            <span className="pyq-col-sub">20 papers · 2005–2024</span>
+          </span>
+          <span className="pyq-col-blurb">
+            Full-paper practice with a 🤖 AI explainer on every answer.
+          </span>
+          <span className="pyq-col-cta">Open the AI column →</span>
+        </Link>
+        <Link to="/pyq/cse" className="pyq-column">
+          <span className="pyq-col-emoji">💻</span>
+          <span className="pyq-col-head">
+            <span className="pyq-col-title">GATE CSE / IT</span>
+            <span className="pyq-col-sub">20 papers · 2005–2024</span>
+          </span>
+          <span className="pyq-col-blurb">
+            Computer Science &amp; IT full-paper practice with AI-explained
+            answers.
+          </span>
+          <span className="pyq-col-cta">Open the AI column →</span>
+        </Link>
+        <Link to="/pyq/pcb" className="pyq-column">
+          <span className="pyq-col-emoji">📐</span>
+          <span className="pyq-col-head">
+            <span className="pyq-col-title">PCB Design Studio</span>
+            <span className="pyq-col-sub">20 editions · board practice</span>
+          </span>
+          <span className="pyq-col-blurb">
+            Materials, layout &amp; routing, DRC, and assembly — AI-explained
+            board-design practice from the SiliconCAD curriculum.
+          </span>
+          <span className="pyq-col-cta">Open the AI column →</span>
+        </Link>
+      </div>
+
       <div className="gate-grid">
         {GATE_MODULES.map((m) => (
           <Link key={m.id} to={`/gate/${m.id}`} className="gate-card">

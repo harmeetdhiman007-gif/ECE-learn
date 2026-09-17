@@ -1,6 +1,6 @@
-# Ohmie — Learn Electronics
+# Silicon Logic — Learn Electronics
 
-A web + mobile clone of **Ohmie: Learn Electronics**, built with **React + Vite + TypeScript + Capacitor** and backed by **Neon Postgres** for optional cross-device sync.
+A web + mobile electronics learning app built with **React + Vite + TypeScript + Capacitor** and backed by **Neon Postgres** for optional cross-device sync.
 
 Learn electronics the way you learn a language: 3-minute, game-like lessons with live circuit simulations. Tap the break in the loop. Fix the fault. Watch the LED light up — on a circuit that actually simulates.
 
@@ -8,7 +8,7 @@ Learn electronics the way you learn a language: 3-minute, game-like lessons with
 
 - ⚡ **Live circuit simulator** — a real Modified Nodal Analysis (MNA) engine solves DC circuits: battery, resistor, LED (nonlinear, iterated), lamp, switch, wires. `src/lib/sim/engine.ts`
 - 📖 **Interactive lesson player** — info cards, instant-feedback quizzes, and circuit puzzles ("detect the break, tap to fix it"). `src/lib/lessons/`
-- 🏆 **Gamification** — XP, day streaks, daily quests, and a mascot (Ohmie). Progress persists locally via `localStorage` (Zustand persist).
+- 🏆 **Gamification** — XP, day streaks, daily quests, and a mascot (SiLo). Progress persists locally via `localStorage` (Zustand persist).
 - 🔧 **Circuit Lab** — an open bench with presets: flip switches, change resistor values (preset chips), battery voltage steppers — the LEDs respond live.
 - ☁️ **Neon sync (optional)** — progress follows you across devices: XP, streak, coins, nickname, and completed lessons push to your Neon database. A live **weekly leaderboard** ranks players by XP earned this week. Local-first by default; sync silently skips if no `VITE_DATABASE_URL`.
 - 📱 **Capacitor** — same codebase builds to Android / iOS / desktop.
@@ -37,7 +37,7 @@ The app runs fully offline with zero accounts. To enable cross-device sync:
 1. Copy `.env.example` to `.env.local` and put your connection string in `VITE_DATABASE_URL`.
 2. The app auto-creates your player row, and pushes XP / streaks / completed lessons after each save.
 
-The `ohmie` database (on the `ohmie-app` branch) uses:
+The database (on the Neon `ohmie-app` branch) uses:
 
 ```sql
 CREATE TABLE players (
@@ -95,6 +95,6 @@ Verified physics (`npm test`):
 
 - Full drag-and-drop Circuit Lab editor (place parts, draw wires)
 - 500+ lesson packs across Circuits, Components, Digital Logic, Embedded Systems, Robotics
-- AI tutor ("Ask Ohmie") chat
+- AI tutor ("Ask SiLo") chat
 - PCB Studio (schematic → layout → 3D)
 - Live duels against other players on the weekly leaderboard

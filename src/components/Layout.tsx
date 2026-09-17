@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useStore } from '../lib/state/store.js';
 import { initSync, pushProgress, markLesson } from '../lib/sync/neon.js';
+import { getActivePlayerId } from '../lib/auth.js';
 
 const NAV = [
   { to: '/', icon: '⌂', label: 'Home' },
@@ -19,8 +20,10 @@ export default function Layout() {
   const coins = useStore((s) => s.coins);
 
   useEffect(() => {
-    void initSync();
+    const pid = getActivePlayerId() ?? undefined;
+    void initSync(pid);
     const unsub = useStore.subscribe((state, prev) => {
+      const pid = getActivePlayerId() ?? undefined;
       if (
         state.xp !== prev.xp ||
         state.streak !== prev.streak ||
@@ -33,12 +36,13 @@ export default function Layout() {
           state.completedLessonIds.length,
           state.coins,
           state.account.nickname,
+          pid,
         );
       }
       const newLessons = state.completedLessonIds.filter(
         (id) => !prev.completedLessonIds.includes(id),
       );
-      for (const id of newLessons) void markLesson(id);
+      for (const id of newLessons) void markLesson(id, pid);
     });
     return unsub;
   }, []);
@@ -48,7 +52,7 @@ export default function Layout() {
       <header className="app-header">
         <Link to="/" className="logo-link">
           <span className="logo-icon">⚡</span>
-          <span className="logo-text">Ohmie</span>
+          <span className="logo-text">SiLo</span>
         </Link>
         <div className="header-stats">
           <span className="stat-streak" title="Streak">🔥 {streak}</span>

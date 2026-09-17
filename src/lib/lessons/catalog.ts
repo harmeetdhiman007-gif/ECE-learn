@@ -49,7 +49,7 @@ const WIRE_BOTTOM_BROKEN = {
   broken: true,
 };
 
-// ── Subjects (real Ohmie structure) ─────────────────────────────────
+// ── Subjects (real SiLo structure) ─────────────────────────────────
 export const SUBJECTS: Subject[] = [
   {
     id: 'electronics',
@@ -59,7 +59,7 @@ export const SUBJECTS: Subject[] = [
     icon: '⚡',
     lessonIds: ['l1', 'l2', 'l3', 'l4', 'l5', 'l-bands', 'l8', 'l6', 'l7', 'l-switch', 'l-build'],
     units: [
-      { id: 'u-basics', title: 'Ohmie Basics', lessonIds: ['l1', 'l2'] },
+      { id: 'u-basics', title: 'Silicon Basics', lessonIds: ['l1', 'l2'] },
       { id: 'u-ohms-series', title: "Ohm's Law & Series", lessonIds: ['l3', 'l4', 'l8'] },
       { id: 'u-components', title: 'Components', lessonIds: ['l5', 'l-bands'] },
       { id: 'u-parallel-switches', title: 'Parallel & Switches', lessonIds: ['l6', 'l7', 'l-switch'] },
@@ -115,7 +115,7 @@ export const SUBJECTS: Subject[] = [
   {
     id: 'pcb',
     title: 'PCB Design',
-    description: 'OhmieCAD — design real circuit boards.',
+    description: 'SiliconCAD — design real circuit boards.',
     color: '#d29922',
     icon: '📐',
     lessonIds: ['l-pcb', 'l-trace'],
@@ -126,7 +126,7 @@ export const SUBJECTS: Subject[] = [
   {
     id: 'robotics',
     title: 'Robotics',
-    description: 'Motors, sensors, and autonomous machines — Ohmie World awaits.',
+    description: 'Motors, sensors, and autonomous machines — SiLo World awaits.',
     color: '#9b59b6',
     icon: '🦾',
     lessonIds: ['l-motor', 'l-servo'],
@@ -1649,7 +1649,7 @@ instruction:
           'Check the layout (DRC + 3D preview)',
         ],
         explanation:
-          "Schematic first, then component placement, then trace routing, then a final check — that's the standard flow in OhmieCAD.",
+          "Schematic first, then component placement, then trace routing, then a final check — that's the standard flow in SiliconCAD.",
         xp: 10,
       },
     ],

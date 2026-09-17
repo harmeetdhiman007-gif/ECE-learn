@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ohmie.app',
-  appName: 'Ohmie',
+  appId: 'io.silo.app',
+  appName: 'SiLo',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

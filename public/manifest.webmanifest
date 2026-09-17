@@ -1,8 +1,8 @@
 {
-  "name": "Ohmie — Learn Electronics",
-  "short_name": "Ohmie",
+  "name": "Silicon Logic — Learn Electronics",
+  "short_name": "SiLo",
   "description": "Learn electronics and circuit building, step by step.",
-  "id": "io.ohmie.app",
+  "id": "io.silo.app",
   "start_url": "/subjects",
   "scope": "/",
   "display": "standalone",

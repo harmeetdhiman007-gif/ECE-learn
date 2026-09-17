@@ -18,9 +18,13 @@ import { neon } from '@neondatabase/serverless';
 
 const DATABASE_URL: string | undefined = import.meta.env.VITE_DATABASE_URL;
 
-const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
+export const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
 
-function getDeviceId(): string {
+/**
+ * The player identity used for guest (not signed-in) progress writes.
+ * A signed-in user returns their account row id instead — see getActivePlayerId().
+ */
+export function getDeviceId(): string {
   let id = localStorage.getItem('ohmie-device-id');
   if (!id) {
     id = crypto.randomUUID();
@@ -29,10 +33,10 @@ function getDeviceId(): string {
   return id;
 }
 
-export async function initSync(): Promise<boolean> {
+export async function initSync(playerId?: string): Promise<boolean> {
   if (!sql) return false;
   try {
-    const id = getDeviceId();
+    const id = playerId ?? getDeviceId();
     await sql`INSERT INTO players (id) VALUES (${id}) ON CONFLICT (id) DO NOTHING`;
     return true;
   } catch {
@@ -46,10 +50,11 @@ export async function pushProgress(
   lessonsCompleted: number,
   coins: number,
   nickname: string,
+  playerId?: string,
 ): Promise<void> {
   if (!sql) return;
   try {
-    const id = getDeviceId();
+    const id = playerId ?? getDeviceId();
     await sql`
       WITH this_week AS (SELECT date_trunc('week', now())::date AS d)
       UPDATE players
@@ -75,10 +80,10 @@ export async function pushProgress(
   }
 }
 
-export async function markLesson(lessonId: string): Promise<void> {
+export async function markLesson(lessonId: string, playerId?: string): Promise<void> {
   if (!sql) return;
   try {
-    const id = getDeviceId();
+    const id = playerId ?? getDeviceId();
     await sql`
       INSERT INTO completed_lessons (player_id, lesson_id)
       VALUES (${id}, ${lessonId})
