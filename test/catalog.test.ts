@@ -1,4 +1,4 @@
-import { LESSONS, getLessonsForSubject } from '../src/lib/lessons/catalog.ts';
+import { LESSONS, ALL_LESSONS, getLessonsForSubject } from '../src/lib/lessons/catalog.ts';
 import { simulate, checkCircuit } from '../src/lib/sim/engine.ts';
 import type { CircuitModel } from '../src/lib/sim/types.ts';
 import { BAND_COLORS } from '../src/lib/sim/bands.ts';
@@ -29,6 +29,29 @@ for (const lesson of LESSONS) {
     stepIds.add(step.id);
   }
 }
+
+// 1b. Full curriculum: unique ids/steps across hand-written + generated
+console.log('\nFull curriculum:');
+const allLessonIds = new Set<string>();
+const allStepIds = new Set<string>();
+let duplicateLesson = false;
+let duplicateStep = false;
+let emptyLesson = false;
+for (const lesson of ALL_LESSONS) {
+  if (allLessonIds.has(lesson.id)) duplicateLesson = true;
+  allLessonIds.add(lesson.id);
+  if (lesson.steps.length < 2) emptyLesson = true;
+  for (const step of lesson.steps) {
+    if (allStepIds.has(step.id)) duplicateStep = true;
+    allStepIds.add(step.id);
+  }
+}
+assert(
+  `all ${ALL_LESSONS.length} lessons have unique ids`,
+  !duplicateLesson,
+);
+assert(`all ${ALL_LESSONS.length} lessons have steps`, !emptyLesson);
+assert(`all ${allStepIds.size} step ids are unique`, !duplicateStep);
 
 // 2. Subjects reference only existing lessons
 const allIds = new Set(LESSONS.map((l) => l.id));

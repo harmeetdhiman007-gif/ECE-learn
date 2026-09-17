@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LESSONS } from '../lib/lessons/catalog.js';
+import { ALL_LESSONS } from '../lib/lessons/catalog.js';
 import { useStore, useCurrentHearts } from '../lib/state/store.js';
 import { getLevel } from '../lib/state/levels.js';
 
@@ -11,12 +11,12 @@ export default function Home() {
   const completed = useStore((s) => s.completedLessonIds);
   const practiceQueue = useStore((s) => s.practiceQueue);
   const practiceDue = useStore((s) => s.practiceDue);
-  const total = LESSONS.length;
-  const done = completed.filter((id) => LESSONS.some((l) => l.id === id)).length;
+  const total = ALL_LESSONS.length;
+  const done = completed.filter((id) => ALL_LESSONS.some((l) => l.id === id)).length;
   const navigate = useNavigate();
 
   const info = getLevel(xp);
-  const nextLesson = LESSONS.find((l) => !completed.includes(l.id)) ?? LESSONS[0];
+  const nextLesson = ALL_LESSONS.find((l) => !completed.includes(l.id)) ?? ALL_LESSONS[0];
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 60_000);
@@ -117,7 +117,7 @@ export default function Home() {
         <h2>Keep going</h2>
       </section>
       <div className="subject-list">
-        {LESSONS.slice(0, 3).map((l) => {
+        {ALL_LESSONS.slice(0, 3).map((l) => {
           const isDone = completed.includes(l.id);
           return (
             <Link key={l.id} to={`/lesson/${l.id}`} className="lesson-row">

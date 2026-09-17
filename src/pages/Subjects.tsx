@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SUBJECTS, getLessonsForSubject } from '../lib/lessons/catalog.js';
+import { SUBJECTS, getLessonsForSubject, getUnitsFor } from '../lib/lessons/catalog.js';
 import { useStore } from '../lib/state/store.js';
 import { fetchLeaderboard, type LeaderboardEntry } from '../lib/sync/neon.js';
 
@@ -102,6 +102,7 @@ export default function Subjects() {
 
       {SUBJECTS.map((subject) => {
         const lessons = getLessonsForSubject(subject.id);
+        const units = getUnitsFor(subject.id);
         const done = lessons.filter((l) => completed.includes(l.id)).length;
         const open = openId === subject.id;
         return (
@@ -130,8 +131,8 @@ export default function Subjects() {
                   <p className="coming-soon">Coming soon…</p>
                 )}
 
-                {subject.units ? (
-                  subject.units.map((unit) => {
+                {units.length > 0 ? (
+                  units.map((unit) => {
                     const unitLessons = lessons.filter((l) =>
                       unit.lessonIds.includes(l.id),
                     );
@@ -174,12 +175,17 @@ export default function Subjects() {
   );
 }
 
-function LessonRow({ lesson, done }: { lesson: { id: string; order: number; title: string; subtitle: string; xpReward: number }; done: boolean }) {
+function LessonRow({ lesson, done }: { lesson: { id: string; order: number; title: string; subtitle: string; xpReward: number; level?: string }; done: boolean }) {
   return (
     <Link key={lesson.id} to={`/lesson/${lesson.id}`} className="lesson-row">
       <span className="lesson-check">{done ? '✅' : '⬜'}</span>
       <span className="lesson-info">
-        <span className="lesson-title">{lesson.order}. {lesson.title}</span>
+        <span className="lesson-title">
+          {lesson.order}. {lesson.title}
+          {lesson.level && (
+            <span className={`level-badge level-${lesson.level}`}>{lesson.level}</span>
+          )}
+        </span>
         <span className="lesson-sub">{lesson.subtitle}</span>
       </span>
       <span className="lesson-xp">+{lesson.xpReward} XP</span>

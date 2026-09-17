@@ -1,4 +1,4 @@
-import { LESSONS } from './catalog.js';
+import { ALL_LESSONS } from './catalog.js';
 import type { Lesson, QuizStep, GateStep } from './types.js';
 
 export interface PoolQuestion {
@@ -121,7 +121,7 @@ const EXTRA_QUESTIONS: PoolQuestion[] = [
 
 export function quizPool(): PoolQuestion[] {
   const out: PoolQuestion[] = [];
-  for (const lesson of LESSONS) {
+  for (const lesson of ALL_LESSONS) {
     for (const step of lesson.steps) {
       if (step.type === 'quiz' || step.type === 'gate') {
         out.push(fromLesson(lesson, step));

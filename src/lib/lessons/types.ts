@@ -102,6 +102,7 @@ export interface Lesson {
   subjectId: string;
   order: number;
   xpReward: number;
+  level?: 'basic' | 'intermediate' | 'advanced';
   steps: Step[];
 }
 

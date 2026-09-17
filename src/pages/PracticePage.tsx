@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LESSONS } from '../lib/lessons/catalog.js';
+import { ALL_LESSONS } from '../lib/lessons/catalog.js';
 import type { Step } from '../lib/lessons/types.js';
 import StepCard from '../components/StepCard.js';
 import { useStore } from '../lib/state/store.js';
 
 function resolveStep(stepId: string): Step | undefined {
-  for (const lesson of LESSONS) {
+  for (const lesson of ALL_LESSONS) {
     const found = lesson.steps.find((s) => s.id === stepId);
     if (found) return found;
   }

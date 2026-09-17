@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { randomQuizQuestions } from '../lib/lessons/pool.js';
+import { hashStr, mulberry32 } from '../lib/pyq/gen.js';
 import { useStore } from '../lib/state/store.js';
 import { playFx } from '../lib/sfx.js';
 
@@ -12,6 +13,42 @@ const TRAINER_INFO: Record<string, { name: string; emoji: string; winCoins: numb
 };
 
 type DuelMode = 'classic' | 'timed' | 'endless';
+type Difficulty = 'easy' | 'medium' | 'hard';
+
+const DIFFICULTY: Record<Difficulty, { label: string; accuracy: number }> = {
+  easy: { label: '😌 Easy', accuracy: 0.45 },
+  medium: { label: '🙂 Medium', accuracy: 0.68 },
+  hard: { label: '😤 Hard', accuracy: 0.88 },
+};
+const DIFFICULTY_ORDER: Difficulty[] = ['easy', 'medium', 'hard'];
+const DIFF_KEY = 'ohmie-duel-difficulty';
+
+function loadDifficulty(): Difficulty {
+  if (typeof localStorage === 'undefined') return 'medium';
+  const saved = localStorage.getItem(DIFF_KEY);
+  return saved === 'easy' || saved === 'medium' || saved === 'hard' ? saved : 'medium';
+}
+
+interface TrainerPlan {
+  correct: boolean;
+  choice: number;
+}
+
+function planRound(
+  question: { stepId: string; choices: string[]; correctIndex: number },
+  index: number,
+  seed: number,
+  accuracy: number,
+): TrainerPlan {
+  const rng = mulberry32(hashStr(`${seed}:${question.stepId}:${index}`));
+  const correct = rng() < accuracy;
+  if (correct) return { correct: true, choice: question.correctIndex };
+  const wrong = question.choices
+    .map((_, i) => i)
+    .filter((i) => i !== question.correctIndex);
+  const choice = wrong[Math.floor(rng() * wrong.length)] ?? question.correctIndex;
+  return { correct: false, choice };
+}
 
 const MODES: { id: DuelMode; label: string; hint: string }[] = [
   { id: 'classic', label: 'Classic', hint: 'First to 5 wins' },
@@ -33,9 +70,11 @@ export default function DuelPage() {
   const countDuelWin = useStore((s) => s.countDuelWin);
 
   const [state] = useState(() => ({
-    questions: randomQuizQuestions(10),
+    questions: randomQuizQuestions(30),
   }));
   const [mode, setMode] = useState<DuelMode>('classic');
+  const [difficulty, setDifficulty] = useState<Difficulty>(loadDifficulty);
+  const [seed, setSeed] = useState(1);
   const [idx, setIdx] = useState(0);
   const [playerScore, setPlayerScore] = useState(0);
   const [trainerScore, setTrainerScore] = useState(0);
@@ -47,7 +86,21 @@ export default function DuelPage() {
   const [result, setResult] = useState<'win' | 'loss' | null>(null);
   const [claimed, setClaimed] = useState(false);
 
-  const q = state.questions[idx];
+  const total = state.questions.length;
+  const q = state.questions.length > 0 ? state.questions[idx % total] : undefined;
+
+  const plan = useMemo<TrainerPlan[]>(() => {
+    const accuracy = DIFFICULTY[difficulty].accuracy;
+    return state.questions.map((question, i) =>
+      planRound(question, i, seed, accuracy),
+    );
+  }, [state.questions, difficulty, seed]);
+
+  const round = plan[idx % total];
+
+  useEffect(() => {
+    localStorage.setItem(DIFF_KEY, difficulty);
+  }, [difficulty]);
 
   useEffect(() => {
     if (mode !== 'timed' || over || claimed) return;
@@ -62,14 +115,15 @@ export default function DuelPage() {
       const id = setTimeout(() => {
         playFx('wrong');
         setOver(true);
-        setResult(playerScore >= TIMED_TARGET ? 'win' : 'loss');
+        setResult(playerScore > trainerScore ? 'win' : 'loss');
       }, 0);
       return () => clearTimeout(id);
     }
-  }, [mode, timeLeft, over, playerScore]);
+  }, [mode, timeLeft, over, playerScore, trainerScore]);
 
   const resetDuel = (nextMode: DuelMode) => {
     setMode(nextMode);
+    setSeed((s) => s + 1);
     setIdx(0);
     setPlayerScore(0);
     setTrainerScore(0);
@@ -90,38 +144,45 @@ export default function DuelPage() {
   };
 
   const submit = () => {
-    if (choice === null || submitted) return;
+    if (choice === null || submitted || !q) return;
     setSubmitted(true);
     const playerCorrect = choice === q.correctIndex;
     playFx(playerCorrect ? 'correct' : 'wrong');
 
+    const trainerCorrect = round?.correct ?? false;
+    const nextP = playerScore + (playerCorrect ? 1 : 0);
+    const nextT = trainerScore + (trainerCorrect ? 1 : 0);
+    if (playerCorrect) setPlayerScore(nextP);
+    if (trainerCorrect) setTrainerScore(nextT);
+
     if (mode === 'endless') {
-      if (playerCorrect) {
-        const nextP = playerScore + 1;
-        setPlayerScore(nextP);
-        if (nextP >= ENDLESS_TARGET) finish(true);
-      } else {
+      if (!playerCorrect) {
         const nextLives = lives - 1;
         setLives(nextLives);
-        if (nextLives <= 0) finish(playerScore >= 8);
+        if (nextLives <= 0) finish(nextP >= nextT);
+      } else if (nextP >= ENDLESS_TARGET) {
+        finish(true);
       }
       return;
     }
 
-    const trainerCorrect =
-      mode === 'classic' && ((idx * 7 + trainer.length) % 5) !== 0;
-    if (playerCorrect) setPlayerScore((s) => s + 1);
-    else if (trainerCorrect) setTrainerScore((s) => s + 1);
-
-    const nextP = playerScore + (playerCorrect ? 1 : 0);
-    const nextT = trainerScore + (playerCorrect ? 0 : trainerCorrect ? 1 : 0);
     if (mode === 'timed') {
       if (nextP >= TIMED_TARGET) finish(true);
-    } else if (nextP >= 5 || nextT >= 5) {
+      else if (nextT >= TIMED_TARGET) finish(false);
+      return;
+    }
+
+    if (nextP >= 5 || nextT >= 5) {
       finish(nextP >= 5);
-    } else if (idx + 1 >= state.questions.length) {
+    } else if (idx + 1 >= total) {
       finish(nextP > nextT);
     }
+  };
+
+  const advance = () => {
+    setIdx((i) => i + 1);
+    setChoice(null);
+    setSubmitted(false);
   };
 
   const claim = () => {
@@ -199,22 +260,34 @@ export default function DuelPage() {
         ))}
       </div>
 
+      <div className="mode-chips">
+        {DIFFICULTY_ORDER.map((d) => (
+          <button
+            key={d}
+            className={`chip ${difficulty === d ? 'active' : ''}`}
+            onClick={() => setDifficulty(d)}
+          >
+            {DIFFICULTY[d].label}
+          </button>
+        ))}
+      </div>
+
       <div className="duel-score">
         {mode === 'endless' ? (
           <>
             <span className="duel-you">
-              {playerScore} correct
+              You — {playerScore}
             </span>
             <span className="duel-vs">vs</span>
             <span className="duel-them">
-              {'❤️'.repeat(Math.max(0, lives)) || '☠️'}
+              {info.name} — {trainerScore} · {'❤️'.repeat(Math.max(0, lives)) || '☠️'}
             </span>
           </>
         ) : mode === 'timed' ? (
           <>
             <span className="duel-you">You — {playerScore}</span>
             <span className="duel-vs">⏱ {timeLeft}s</span>
-            <span className="duel-them">Goal — {TIMED_TARGET}</span>
+            <span className="duel-them">{info.name} — {trainerScore} / {TIMED_TARGET}</span>
           </>
         ) : (
           <>
@@ -233,6 +306,9 @@ export default function DuelPage() {
             if (submitted) {
               if (i === q.correctIndex) cls += ' correct';
               else if (i === choice) cls += ' wrong';
+              if (round && i === round.choice && i !== q.correctIndex) {
+                cls += ' trainer-pick';
+              }
             }
             return (
               <button key={i} className={cls} disabled={submitted} onClick={() => setChoice(i)}>
@@ -249,26 +325,27 @@ export default function DuelPage() {
               Lock it in
             </button>
             {mode === 'endless' && (
-              <button className="btn-ghost" onClick={() => finish(playerScore >= 8)}>
+              <button className="btn-ghost" onClick={() => finish(playerScore >= trainerScore)}>
                 End run
               </button>
             )}
           </div>
         )}
 
-        {submitted && (
+        {submitted && round && (
+          <div className="duel-reveal">
+            {info.emoji} {info.name} answered{' '}
+            <strong>{String.fromCharCode(65 + round.choice)}</strong> —{' '}
+            {round.correct ? '✓ correct' : '✗ wrong'}
+          </div>
+        )}
+
+        {submitted && q && (
           <div className={`explain ${choice === q.correctIndex ? 'ok' : 'bad'}`}>
             <strong>{choice === q.correctIndex ? 'You got it! ' : 'Ouch — you missed it. '}</strong>
             {q.explanation}
             {!over && (
-              <button
-                className="btn-primary btn-inline"
-                onClick={() => {
-                  setIdx((i) => i + 1);
-                  setChoice(null);
-                  setSubmitted(false);
-                }}
-              >
+              <button className="btn-primary btn-inline" onClick={advance}>
                 Next round →
               </button>
             )}

@@ -1,4 +1,5 @@
 import type { Subject, Lesson } from './types.js';
+import { generatedLessons, generatedUnitsFor } from './curriculum.js';
 
 // ── Circuit fixtures (all verified to simulate — see test/catalog.test.ts) ──
 // Standard grid: battery up the left (x=1, y1→y3), top rail, resistor span,
@@ -2392,16 +2393,25 @@ instruction:
 ];
 
 // ── Lookup helpers ───────────────────────────────────────────────────
+/** Every lesson: hand-written path first, then the 500 multi-module courses. */
+export const ALL_LESSONS: Lesson[] = [...LESSONS, ...generatedLessons()];
+
 export function getSubject(id: string): Subject | undefined {
   return SUBJECTS.find((s) => s.id === id);
 }
 
 export function getLesson(id: string): Lesson | undefined {
-  return LESSONS.find((l) => l.id === id);
+  return ALL_LESSONS.find((l) => l.id === id);
 }
 
 export function getLessonsForSubject(subjectId: string): Lesson[] {
-  return LESSONS.filter((l) => l.subjectId === subjectId).sort(
-    (a, b) => a.order - b.order,
-  );
+  const base = LESSONS.filter((l) => l.subjectId === subjectId);
+  const generated = generatedLessons().filter((l) => l.subjectId === subjectId);
+  return [...base, ...generated];
+}
+
+/** Hand-written units plus the generated course units for a subject. */
+export function getUnitsFor(subjectId: string) {
+  const subject = getSubject(subjectId);
+  return [...(subject?.units ?? []), ...generatedUnitsFor(subjectId)];
 }

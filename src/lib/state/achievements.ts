@@ -1,4 +1,4 @@
-import { LESSONS } from '../lessons/catalog.js';
+import { ALL_LESSONS } from '../lessons/catalog.js';
 
 export interface AchievementInput {
   xp: number;
@@ -21,10 +21,10 @@ export interface AchievementWithState extends Achievement {
   unlocked: boolean;
 }
 
-const gateStepIds = LESSONS.flatMap((l) =>
+const gateStepIds = ALL_LESSONS.flatMap((l) =>
   l.steps.filter((s) => s.type === 'gate').map((s) => s.id),
 );
-const circuitStepIds = LESSONS.flatMap((s) =>
+const circuitStepIds = ALL_LESSONS.flatMap((s) =>
   s.steps.filter((st) => st.type === 'circuit').map((st) => st.id),
 );
 
@@ -49,8 +49,8 @@ const DEFS: (Achievement & {
     id: 'graduate',
     emoji: '🎓',
     title: 'Graduate',
-    description: `Complete all ${LESSONS.length} lessons.`,
-    test: (s) => s.completedLessonIds.length >= LESSONS.length,
+    description: `Complete all ${ALL_LESSONS.length} lessons.`,
+    test: (s) => s.completedLessonIds.length >= ALL_LESSONS.length,
   },
   {
     id: 'volt',

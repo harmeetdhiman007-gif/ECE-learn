@@ -374,6 +374,35 @@ a {
   color: var(--text-dim);
 }
 
+.level-badge {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  vertical-align: middle;
+}
+
+.level-basic {
+  color: #6ee7a8;
+  background: rgba(110, 231, 168, 0.14);
+  border: 1px solid rgba(110, 231, 168, 0.4);
+}
+
+.level-intermediate {
+  color: #f0c674;
+  background: rgba(240, 198, 116, 0.14);
+  border: 1px solid rgba(240, 198, 116, 0.4);
+}
+
+.level-advanced {
+  color: #ff8a9b;
+  background: rgba(255, 138, 155, 0.14);
+  border: 1px solid rgba(255, 138, 155, 0.4);
+}
+
 .text-link {
   font-size: 14px;
   font-weight: 700;
@@ -574,6 +603,21 @@ a {
 .choice-btn.wrong {
   border-color: var(--red);
   background: rgba(255, 68, 68, 0.08);
+}
+
+.choice-btn.trainer-pick {
+  outline: 2px dashed rgba(240, 198, 116, 0.7);
+  outline-offset: 2px;
+}
+
+.duel-reveal {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-strong);
+  font-size: 13px;
+  color: var(--text-dim);
 }
 
 .choice-letter {
