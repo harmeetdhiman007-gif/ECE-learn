@@ -30,6 +30,28 @@ npm run lint      # oxlint
 npm test          # circuit simulator physics tests (tsx)
 ```
 
+## Deploy (secret-free · works offline)
+
+This is a **client-only SPA** — no server. Local-first by default: XP, coins,
+streak and completed lessons are saved in `localStorage` so it works fully
+offline (and on the APK) with **no database configured at all**.
+
+Deploying is one command (or one click) and **no env vars are required** —
+build with zero `VITE_*` set and you ship a clean, secret-free bundle:
+
+```bash
+npm run build     # → dist/
+npx vercel        # answer the prompts (Project: import existing? link this dir)
+npx vercel --prod # ship it
+```
+
+Or on the dashboard: **New Project → import this GitHub repo → Build command
+`npm run build` → Output `dist`** → Deploy. That's it.
+
+If you want **cross-device progress sync (Neon Postgres)** or **live-AI
+explainers**, they're additive and opt-in — see the next section. Nothing needs
+to be configured for a great offline-first build.
+
 ## Neon sync (optional)
 
 The app runs fully offline with zero accounts. To enable cross-device sync:
