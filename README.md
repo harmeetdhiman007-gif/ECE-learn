@@ -1,4 +1,4 @@
-# Silicon Logic — Learn Electronics
+﻿# Silicon Logic — Learn Electronics
 
 A web + mobile electronics learning app built with **React + Vite + TypeScript + Capacitor** and backed by **Neon Postgres** for optional cross-device sync.
 
@@ -10,6 +10,7 @@ Learn electronics the way you learn a language: 3-minute, game-like lessons with
 - 📖 **Interactive lesson player** — info cards, instant-feedback quizzes, and circuit puzzles ("detect the break, tap to fix it"). `src/lib/lessons/`
 - 🏆 **Gamification** — XP, day streaks, daily quests, and a mascot (SiLo). Progress persists locally via `localStorage` (Zustand persist).
 - 🔧 **Circuit Lab** — an open bench with presets: flip switches, change resistor values (preset chips), battery voltage steppers — the LEDs respond live.
+- ⭐ **GATE PYQ + Studios** — practice past GATE papers by track (`/pyq`) and a Studio hub (`/studio`) for PCB Design and VLSI workbenches. Deep links are SPA-rewritten.
 - ☁️ **Neon sync (optional)** — progress follows you across devices: XP, streak, coins, nickname, and completed lessons push to your Neon database. A live **weekly leaderboard** ranks players by XP earned this week. Local-first by default; sync silently skips if no `VITE_DATABASE_URL`.
 - 📱 **Capacitor** — same codebase builds to Android / iOS / desktop.
 
@@ -30,36 +31,28 @@ npm run lint      # oxlint
 npm test          # circuit simulator physics tests (tsx)
 ```
 
-## Deploy (secret-free · works offline)
+## Deploy to Vercel (free · no secrets in the bundle)
 
-This is a **client-only SPA** — no server. Local-first by default: XP, coins,
-streak and completed lessons are saved in `localStorage` so it works fully
-offline (and on the APK) with **no database configured at all**.
-
-Deploying is one command (or one click) and **no env vars are required** —
-build with zero `VITE_*` set and you ship a clean, secret-free bundle:
+This is a **client-only SPA** — it runs entirely on the device (local-first progress + XP) and needs **no** server at all. Deploying is one click and works with **zero env vars** — build with none set and you ship a clean, secret-free bundle. Deep links (`/pyq/ece`, `/studio/vlsi`, duel rooms, …) are SPA-rewritten by `vercel.json`.
 
 ```bash
 npm run build     # → dist/
-npx vercel        # answer the prompts (Project: import existing? link this dir)
+npx vercel        # import this dir → link → deploy
 npx vercel --prod # ship it
 ```
 
-Or on the dashboard: **New Project → import this GitHub repo → Build command
-`npm run build` → Output `dist`** → Deploy. That's it.
+Or on the dashboard: **New Project → import this GitHub repo → Vite preset → keep defaults** (vercel.json handles build command, output dir and SPA fallback) → **Deploy**.
 
-If you want **cross-device progress sync (Neon Postgres)** or **live-AI
-explainers**, they're additive and opt-in — see the next section. Nothing needs
-to be configured for a great offline-first build.
+**Security note:** because there's no server, secrets stay out of the bundle. Don't build with `VITE_DATABASE_URL` / `VITE_AI_*` set for a public deploy. Unset, the app runs perfectly local-first — nothing sensitive ships. To enable cross-device sync from a public/private deploy of your own, see the Neon section below.
 
 ## Neon sync (optional)
 
 The app runs fully offline with zero accounts. To enable cross-device sync:
 
 1. Copy `.env.example` to `.env.local` and put your connection string in `VITE_DATABASE_URL`.
-2. The app auto-creates your player row, and pushes XP / streaks / completed lessons after each save.
+2. The app auto-creates your player row (device-id based), and pushes XP, streaks, coins, nicknamehare, and completed lessons after each save. A live weekly leaderboard ranks players by XP earned this week.
 
-The database (on the Neon `ohmie-app` branch) uses:
+The database (on the Neon `ohmie` project's branch) uses:
 
 ```sql
 CREATE TABLE players (
@@ -87,7 +80,6 @@ CREATE TABLE completed_lessons (
 ```
 
 > `week_started` / `week_start_xp` power the **weekly leaderboard**: on the first sync of a new week the row records the XP total at the start of the week, so the leaderboard ranks by XP earned this week (`xp - week_start_xp`), not career totals.
-```
 
 > ⚠️ **Security note**: embedding a Postgres connection string in a client app is fine for a personal project. For a public release, proxy writes through your own API server instead.
 
